@@ -1,0 +1,2967 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#0f7aa8" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="今日航線" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <title>虎克船長今日航線｜手機雛形</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --sea: #0f7aa8;
+        --deep: #16324f;
+        --sky: #dff4fb;
+        --sun: #ffc857;
+        --coral: #ff7f6e;
+        --mint: #66c6a3;
+        --paper: #fffdf7;
+        --ink: #182536;
+        --muted: #687589;
+        --line: #dce6ed;
+        --shadow: 0 16px 36px rgba(21, 48, 79, 0.16);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        color: var(--ink);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans TC",
+          "PingFang TC", sans-serif;
+        background:
+          radial-gradient(circle at top left, rgba(255, 200, 87, 0.34), transparent 30rem),
+          linear-gradient(160deg, #e8f8fc 0%, #fff7ea 54%, #f4fbf6 100%);
+      }
+
+      .shell {
+        width: min(430px, 100%);
+        min-height: 100vh;
+        margin: 0 auto;
+        padding: 14px 14px 22px;
+      }
+
+      .app {
+        overflow: hidden;
+        min-height: calc(100vh - 28px);
+        border: 1px solid rgba(15, 122, 168, 0.18);
+        border-radius: 26px;
+        background: rgba(255, 253, 247, 0.92);
+        box-shadow: var(--shadow);
+      }
+
+      .hero {
+        position: relative;
+        padding: 18px 18px 16px;
+        color: white;
+        background:
+          linear-gradient(rgba(22, 50, 79, 0.04) 1px, transparent 1px),
+          linear-gradient(135deg, #0f7aa8 0%, #1f9abd 58%, #66c6a3 100%);
+        background-size: 100% 26px, auto;
+      }
+
+      .topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        min-width: 0;
+      }
+
+      .avatar {
+        position: relative;
+        width: 72px;
+        height: 72px;
+        flex: 0 0 auto;
+        border: 3px solid rgba(255, 255, 255, 0.84);
+        border-radius: 50%;
+        background: #7c0716;
+        box-shadow:
+          0 8px 18px rgba(0, 0, 0, 0.16),
+          0 0 0 5px rgba(255, 200, 87, 0.25);
+        overflow: hidden;
+      }
+
+      .avatar img {
+        width: 100%;
+        height: 100%;
+        display: block;
+        object-fit: cover;
+        object-position: center;
+      }
+
+      .brand h1 {
+        margin: 0;
+        font-size: 20px;
+        line-height: 1.18;
+        letter-spacing: 0;
+      }
+
+      .brand p {
+        margin: 4px 0 0;
+        color: rgba(255, 255, 255, 0.86);
+        font-size: 13px;
+      }
+
+      .chip {
+        flex: 0 0 auto;
+        padding: 8px 10px;
+        border: 1px solid rgba(255, 255, 255, 0.45);
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.16);
+        color: white;
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      .captain-note {
+        margin-top: 16px;
+        padding: 13px 14px;
+        border: 1px solid rgba(255, 255, 255, 0.32);
+        border-radius: 16px;
+        background: rgba(255, 255, 255, 0.16);
+        font-size: 14px;
+        line-height: 1.55;
+      }
+
+      .content {
+        padding: 16px 14px 88px;
+      }
+
+      .view {
+        display: none;
+      }
+
+      .view.active {
+        display: block;
+      }
+
+      .weather {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 9px;
+        margin-bottom: 14px;
+      }
+
+      .weather-panel {
+        margin-top: 12px;
+        padding: 12px;
+        border: 1px solid rgba(15, 122, 168, 0.18);
+        border-radius: 18px;
+        background: white;
+        box-shadow: 0 8px 18px rgba(21, 48, 79, 0.06);
+      }
+
+      .weather-panel h2 {
+        margin: 0;
+        color: var(--deep);
+        font-size: 16px;
+      }
+
+      .weather-panel p {
+        margin: 5px 0 10px;
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.45;
+      }
+
+      .lookup-row {
+        display: flex;
+        gap: 8px;
+      }
+
+      .lookup-row input {
+        width: 100%;
+        min-height: 44px;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 0 12px;
+        color: var(--ink);
+        background: #fbfdfe;
+        font: inherit;
+        font-size: 14px;
+      }
+
+      .lookup-row button {
+        min-width: 78px;
+        border: 0;
+        border-radius: 14px;
+        background: var(--sea);
+        color: white;
+        font: inherit;
+        font-size: 13px;
+        font-weight: 900;
+      }
+
+      .weather-result {
+        display: none;
+        margin-top: 10px;
+        border-radius: 14px;
+        background: #f4fafc;
+        padding: 10px;
+        color: var(--deep);
+        font-size: 12px;
+        line-height: 1.55;
+      }
+
+      .weather-result.show {
+        display: block;
+      }
+
+      .mini {
+        min-height: 78px;
+        padding: 11px;
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        background: white;
+      }
+
+      .mini span {
+        display: block;
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .mini strong {
+        display: block;
+        margin-top: 7px;
+        color: var(--deep);
+        font-size: 18px;
+      }
+
+      .section-title {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin: 16px 0 9px;
+      }
+
+      .home-actions {
+        display: grid;
+        gap: 10px;
+        margin-top: 14px;
+      }
+
+      .home-card {
+        width: 100%;
+        border: 1px solid var(--line);
+        border-radius: 17px;
+        background: white;
+        color: inherit;
+        font: inherit;
+        padding: 13px;
+        text-align: left;
+        box-shadow: 0 8px 18px rgba(21, 48, 79, 0.06);
+      }
+
+      .home-card strong {
+        display: block;
+        color: var(--deep);
+        font-size: 15px;
+      }
+
+      .home-card span {
+        display: block;
+        margin-top: 5px;
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.45;
+      }
+
+      .radar-panel {
+        margin-bottom: 14px;
+        padding: 12px;
+        border: 1px solid rgba(255, 200, 87, 0.42);
+        border-radius: 18px;
+        background: linear-gradient(180deg, #fffaf0 0%, #ffffff 100%);
+        box-shadow: 0 8px 18px rgba(21, 48, 79, 0.06);
+      }
+
+      .radar-head {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 10px;
+        margin-bottom: 10px;
+      }
+
+      .radar-head h2 {
+        margin: 0;
+        color: var(--deep);
+        font-size: 16px;
+      }
+
+      .radar-head p {
+        margin: 4px 0 0;
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.45;
+      }
+
+      .radar-live {
+        flex: 0 0 auto;
+        border-radius: 999px;
+        background: #e8f8f2;
+        color: #1f6b58;
+        padding: 7px 9px;
+        font-size: 11px;
+        font-weight: 900;
+      }
+
+      .source-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+      }
+
+      .source-card {
+        min-height: 76px;
+        border: 1px solid #f1ead9;
+        border-radius: 14px;
+        background: white;
+        padding: 10px;
+      }
+
+      .source-card strong {
+        display: block;
+        color: var(--deep);
+        font-size: 13px;
+      }
+
+      .source-card span {
+        display: block;
+        margin-top: 5px;
+        color: var(--muted);
+        font-size: 11px;
+        line-height: 1.45;
+      }
+
+      .alert-list {
+        display: grid;
+        gap: 8px;
+        margin-top: 10px;
+      }
+
+      .alert-item {
+        border-left: 4px solid var(--coral);
+        border-radius: 13px;
+        background: #fff8f6;
+        padding: 10px 11px;
+        color: #5e2d27;
+        font-size: 12px;
+        line-height: 1.5;
+      }
+
+      .alert-item strong {
+        display: block;
+        color: #8a3328;
+        font-size: 13px;
+      }
+
+      .status-panel {
+        margin-top: 12px;
+        padding: 12px;
+        border: 1px solid rgba(15, 122, 168, 0.18);
+        border-radius: 16px;
+        background: #f6fbfd;
+      }
+
+      .status-panel strong {
+        display: block;
+        color: var(--deep);
+        font-size: 14px;
+      }
+
+      .status-panel span {
+        display: block;
+        margin-top: 6px;
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.5;
+      }
+
+      .sync-rule {
+        margin-bottom: 12px;
+        padding: 12px;
+        border: 1px solid rgba(102, 198, 163, 0.4);
+        border-radius: 16px;
+        background: #f2fbf7;
+      }
+
+      .sync-rule strong {
+        display: block;
+        color: #245c4c;
+        font-size: 14px;
+      }
+
+      .sync-rule span {
+        display: block;
+        margin-top: 6px;
+        color: #49685f;
+        font-size: 12px;
+        line-height: 1.5;
+      }
+
+      .field-list {
+        display: grid;
+        gap: 8px;
+        margin-top: 10px;
+      }
+
+      .field-list div {
+        border-radius: 13px;
+        background: white;
+        border: 1px solid rgba(102, 198, 163, 0.28);
+        padding: 9px 10px;
+        color: var(--deep);
+        font-size: 12px;
+        line-height: 1.45;
+      }
+
+      .search-panel {
+        margin-bottom: 14px;
+        padding: 12px;
+        border: 1px solid rgba(15, 122, 168, 0.18);
+        border-radius: 18px;
+        background: white;
+        box-shadow: 0 8px 18px rgba(21, 48, 79, 0.06);
+      }
+
+      .search-label {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        margin-bottom: 9px;
+      }
+
+      .search-label h2 {
+        margin: 0;
+        color: var(--deep);
+        font-size: 16px;
+      }
+
+      .search-label span {
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .search-box {
+        display: flex;
+        gap: 8px;
+      }
+
+      .search-box input {
+        width: 100%;
+        min-height: 44px;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 0 13px;
+        color: var(--ink);
+        background: #fbfdfe;
+        font: inherit;
+        font-size: 14px;
+      }
+
+      .search-box input:focus {
+        border-color: var(--sea);
+        outline: 3px solid rgba(15, 122, 168, 0.12);
+      }
+
+      .search-box button {
+        min-width: 74px;
+        border: 0;
+        border-radius: 14px;
+        background: var(--coral);
+        color: white;
+        font: inherit;
+        font-size: 13px;
+        font-weight: 900;
+      }
+
+      .filters {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        margin-top: 9px;
+      }
+
+      .filters select {
+        width: 100%;
+        min-height: 42px;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 0 10px;
+        color: var(--deep);
+        background: #fbfdfe;
+        font: inherit;
+        font-size: 13px;
+        font-weight: 800;
+      }
+
+      .filters select:focus {
+        border-color: var(--sea);
+        outline: 3px solid rgba(15, 122, 168, 0.12);
+      }
+
+      .quick-tags {
+        display: flex;
+        gap: 7px;
+        overflow-x: auto;
+        margin-top: 9px;
+        padding-bottom: 2px;
+      }
+
+      .quick-tags button {
+        flex: 0 0 auto;
+        border: 1px solid #f1d1c8;
+        border-radius: 999px;
+        background: #fff8f6;
+        color: #8a3328;
+        padding: 7px 10px;
+        font: inherit;
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      .search-results {
+        display: grid;
+        gap: 9px;
+        margin-top: 11px;
+      }
+
+      .place-card {
+        border: 1px solid var(--line);
+        border-radius: 15px;
+        background: #fbfdfe;
+        overflow: hidden;
+      }
+
+      .place-card button {
+        width: 100%;
+        border: 0;
+        background: transparent;
+        color: inherit;
+        font: inherit;
+        text-align: left;
+        padding: 11px;
+      }
+
+      .place-card strong {
+        display: block;
+        color: var(--deep);
+        font-size: 14px;
+      }
+
+      .place-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 7px;
+      }
+
+      .place-meta em {
+        display: inline-flex;
+        border-radius: 999px;
+        background: #eef8fb;
+        color: var(--sea);
+        padding: 4px 8px;
+        font-size: 11px;
+        font-style: normal;
+        font-weight: 900;
+      }
+
+      .place-signal {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 8px;
+      }
+
+      .place-signal b {
+        border-radius: 999px;
+        background: #fff4d7;
+        color: #80520b;
+        padding: 4px 8px;
+        font-size: 11px;
+        font-weight: 900;
+      }
+
+      .place-signal b.warning {
+        background: #ffe9e4;
+        color: #9a3327;
+      }
+
+      .place-card span {
+        display: block;
+        margin-top: 4px;
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.45;
+      }
+
+      .place-detail {
+        display: none;
+        padding: 0 11px 11px;
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.55;
+      }
+
+      .place-card.active .place-detail {
+        display: block;
+      }
+
+      .route-suggestion {
+        margin-top: 8px;
+        padding: 9px;
+        border-radius: 12px;
+        background: #f2faf7;
+        color: #245c4c;
+      }
+
+      .map-link {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: 8px;
+        border-radius: 999px;
+        background: var(--deep);
+        color: white;
+        padding: 7px 10px;
+        font-size: 12px;
+        font-weight: 900;
+        text-decoration: none;
+      }
+
+      .section-title h2 {
+        margin: 0;
+        color: var(--deep);
+        font-size: 17px;
+      }
+
+      .section-title button,
+      .action {
+        border: 0;
+        border-radius: 999px;
+        background: var(--deep);
+        color: white;
+        font: inherit;
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      .section-title button {
+        padding: 8px 10px;
+      }
+
+      .tabs {
+        display: flex;
+        gap: 8px;
+        overflow-x: auto;
+        padding-bottom: 4px;
+      }
+
+      .tab {
+        flex: 0 0 auto;
+        padding: 8px 11px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        background: white;
+        color: var(--muted);
+        font-size: 13px;
+        font-weight: 800;
+      }
+
+      .tab.active {
+        border-color: transparent;
+        background: var(--sun);
+        color: #50340a;
+      }
+
+      .route-list {
+        display: grid;
+        gap: 12px;
+        margin-top: 12px;
+      }
+
+      .route-card {
+        width: 100%;
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        background: white;
+        color: inherit;
+        font: inherit;
+        text-align: left;
+        box-shadow: 0 8px 18px rgba(21, 48, 79, 0.07);
+      }
+
+      .route-card.active {
+        border-color: rgba(15, 122, 168, 0.58);
+        outline: 3px solid rgba(15, 122, 168, 0.13);
+      }
+
+      .route-head {
+        display: flex;
+        gap: 10px;
+        padding: 13px 13px 10px;
+      }
+
+      .route-icon {
+        display: grid;
+        width: 46px;
+        height: 46px;
+        flex: 0 0 auto;
+        place-items: center;
+        border-radius: 14px;
+        background: var(--sky);
+        color: var(--sea);
+        font-size: 23px;
+      }
+
+      .route-card h3 {
+        margin: 0;
+        color: var(--deep);
+        font-size: 16px;
+        line-height: 1.35;
+      }
+
+      .route-card p {
+        margin: 5px 0 0;
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.45;
+      }
+
+      .scores {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 7px;
+        padding: 0 13px 13px;
+      }
+
+      .score {
+        padding: 7px 5px;
+        border-radius: 12px;
+        background: #f4f8fa;
+        text-align: center;
+      }
+
+      .score span {
+        display: block;
+        color: var(--muted);
+        font-size: 11px;
+      }
+
+      .score strong {
+        display: block;
+        margin-top: 2px;
+        color: var(--deep);
+        font-size: 15px;
+      }
+
+      .route-advice {
+        margin: 0 13px 13px;
+        padding: 10px;
+        border-radius: 13px;
+        background: #fff8e7;
+        color: #72500f;
+        font-size: 12px;
+        line-height: 1.5;
+      }
+
+      .detail {
+        margin-top: 14px;
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        background: white;
+        overflow: hidden;
+      }
+
+      .detail-top {
+        padding: 14px;
+        background: #f8fcfd;
+      }
+
+      .detail-top h2 {
+        margin: 0;
+        color: var(--deep);
+        font-size: 19px;
+      }
+
+      .detail-top p {
+        margin: 7px 0 0;
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.5;
+      }
+
+      .today-check {
+        display: grid;
+        gap: 7px;
+        margin-top: 11px;
+      }
+
+      .today-check div {
+        border-radius: 12px;
+        background: white;
+        color: var(--deep);
+        padding: 8px 10px;
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      .timeline {
+        display: grid;
+        gap: 0;
+        padding: 3px 14px 10px;
+      }
+
+      .stop {
+        display: grid;
+        grid-template-columns: 55px 1fr;
+        gap: 12px;
+        padding: 12px 0;
+        border-bottom: 1px solid #eef3f5;
+      }
+
+      .stop:last-child {
+        border-bottom: 0;
+      }
+
+      .time {
+        color: var(--sea);
+        font-size: 13px;
+        font-weight: 900;
+      }
+
+      .stop strong {
+        display: block;
+        color: var(--ink);
+        font-size: 14px;
+      }
+
+      .stop span {
+        display: block;
+        margin-top: 4px;
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.45;
+      }
+
+      .actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        margin: 16px 0 0;
+      }
+
+      .action {
+        min-height: 44px;
+        padding: 10px;
+      }
+
+      .action.secondary {
+        border: 1px solid var(--line);
+        background: white;
+        color: var(--deep);
+      }
+
+      .drawer {
+        display: none;
+        margin-top: 12px;
+        padding: 13px;
+        border: 1px solid rgba(255, 127, 110, 0.34);
+        border-radius: 16px;
+        background: #fff8f6;
+        color: #49322e;
+        font-size: 13px;
+        line-height: 1.6;
+      }
+
+      .drawer.show {
+        display: block;
+      }
+
+      .drawer strong {
+        color: #8a3328;
+      }
+
+      .bottom-nav {
+        position: sticky;
+        bottom: 0;
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 6px;
+        margin: 18px -14px -88px;
+        padding: 10px 10px 12px;
+        border-top: 1px solid var(--line);
+        background: rgba(255, 253, 247, 0.96);
+        backdrop-filter: blur(12px);
+      }
+
+      .bottom-nav button {
+        min-height: 48px;
+        border: 0;
+        border-radius: 14px;
+        background: transparent;
+        color: var(--muted);
+        font: inherit;
+        font-size: 12px;
+        font-weight: 900;
+      }
+
+      .bottom-nav button.active {
+        background: var(--deep);
+        color: white;
+      }
+
+      @media (min-width: 760px) {
+        .shell {
+          padding-top: 32px;
+          padding-bottom: 32px;
+        }
+
+        .app {
+          min-height: auto;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="shell">
+      <section class="app" aria-label="虎克船長今日航線原型">
+        <header class="hero">
+          <div class="topbar">
+            <div class="brand">
+              <div class="avatar" aria-label="活潑可愛有自信的女虎克船長小頭">
+                <div class="avatar-mark" aria-hidden="true">船</div>
+              </div>
+              <div>
+                <h1>虎克船長<br />今日航線</h1>
+                <p>高雄一日遊 AI 小管家</p>
+              </div>
+            </div>
+            <div class="chip">手機版雛形</div>
+          </div>
+          <div class="captain-note">
+            船長幫你整理好今天的高雄航線啦！先挑一條你想走的路線，再一鍵產出 FB 文案、拍攝清單和圖卡文字。
+          </div>
+        </header>
+
+        <section class="content">
+          <section class="view active" data-view="home" aria-label="首頁摘要">
+            <div class="weather">
+              <div class="mini">
+                <span>今日高雄天氣</span>
+                <strong>多雲 31°C</strong>
+                <span>午後留意短暫雨</span>
+              </div>
+              <div class="mini">
+                <span>活動異動</span>
+                <strong>2 筆待確認</strong>
+                <span>系統會標記官方來源</span>
+              </div>
+            </div>
+            <section class="weather-panel" aria-label="查詢地址天氣與地圖">
+              <h2>查地址天氣</h2>
+              <p>輸入高雄地址、店名或景點，先看拍攝建議，也能直接開 Google Maps。</p>
+              <div class="lookup-row">
+                <input id="weatherAddress" type="search" placeholder="例如：高雄市三民區科工館、旗津老街" />
+                <button id="weatherLookupBtn" type="button">查詢</button>
+              </div>
+              <div class="weather-result" id="weatherResult"></div>
+            </section>
+            <div class="home-actions">
+              <button class="home-card" type="button" data-jump="routes">
+                <strong>今日推薦航線</strong>
+                <span>依天氣、營業時間和順路程度，先看今天最適合拍的一日遊。</span>
+              </button>
+              <button class="home-card" type="button" data-jump="search">
+                <strong>搜尋高雄地點</strong>
+                <span>找景點、美食、百貨、夜市、咖啡，並看建議怎麼串路線。</span>
+              </button>
+              <button class="home-card" type="button" data-jump="radar">
+                <strong>船長情報雷達</strong>
+                <span>查看小助手每天會巡邏的熱門來源、新活動和異動提醒。</span>
+              </button>
+              <button class="home-card" type="button" data-jump="radar">
+                <strong>手機使用與每日更新</strong>
+                <span>目前是可 App 化的手機雛形；正式版部署成網址後，可加入手機主畫面，並每日同步最新景點、美食、活動與天氣。</span>
+              </button>
+            </div>
+          </section>
+
+          <section class="view radar-panel" data-view="radar" aria-label="船長情報雷達">
+            <div class="radar-head">
+              <div>
+                <h2>船長情報雷達</h2>
+                <p>每天自動巡邏高雄熱門美食、景點、活動異動，幫你先整理可拍可發的題材。</p>
+              </div>
+              <div class="radar-live">每日更新</div>
+            </div>
+            <div class="source-grid">
+              <div class="source-card">
+                <strong>熱門美食景點</strong>
+                <span>參考 Google Maps 熱門度、評分、評論數與區域距離排序。</span>
+              </div>
+              <div class="source-card">
+                <strong>官方活動展演</strong>
+                <span>追蹤市府、旅遊、文化、展演場館與售票平台資訊。</span>
+              </div>
+              <div class="source-card">
+                <strong>百貨市集快閃</strong>
+                <span>整理百貨檔期、市集、快閃、親子與室內備案。</span>
+              </div>
+              <div class="source-card">
+                <strong>天氣營業時間</strong>
+                <span>依天氣、營業時間、活動時段調整今日推薦路線。</span>
+              </div>
+              <div class="source-card">
+                <strong>結束營業監控</strong>
+                <span>同步店家是否仍營業、暫停營業、搬遷或永久停業。</span>
+              </div>
+              <div class="source-card">
+                <strong>38 區一次同步</strong>
+                <span>高雄所有行政區同步掃描，不需要你一區一區指定。</span>
+              </div>
+            </div>
+            <div class="alert-list">
+              <div class="alert-item">
+                <strong>新活動提醒範例</strong>
+                發現高雄本週末有新展覽或市集時，會通知你並自動排進可拍路線。
+              </div>
+              <div class="alert-item">
+                <strong>異動提醒範例</strong>
+                若活動延期、取消、改地點、售票完售，系統會標記並提醒先不要發錯資訊。
+              </div>
+              <div class="alert-item">
+                <strong>結束營業提醒範例</strong>
+                若店家顯示永久停業、暫停營業或搬遷，系統會移出推薦並建議替代店家。
+              </div>
+            </div>
+            <div class="status-panel">
+              <strong>目前狀態：靜態雛形</strong>
+              <span>現在這個畫面只是流程展示，不會自動更新。正式版會部署成手機可開的網址，設定每日排程，自動抓 Google Places 店家資料、官方活動、天氣與營業/停業狀態，再更新推薦路線。</span>
+            </div>
+            <div class="status-panel">
+              <strong>正式版資料標準</strong>
+              <span>美食必須是正確店名，不使用「XX區美食」泛稱；每筆至少要有營業時間、Google 地圖連結、評分、評論數、最後更新時間與資料來源。</span>
+            </div>
+            <div class="status-panel">
+              <strong>全區更新規則</strong>
+              <span>正式版每天自動掃高雄 38 區的景點與美食，新增店家、熱門度變化、結束營業、活動異動都要進入更新流程，不需要你手動補名單。</span>
+            </div>
+            <div class="status-panel">
+              <strong>不手動維護清單</strong>
+              <span>正式版不靠人工把店名一筆一筆寫死，而是每天同步 Google Places 與官方資料。這樣才會有最新、正確、可導航、可判斷營業/停業的細項。</span>
+            </div>
+            <div class="status-panel">
+              <strong>手機版使用方式</strong>
+              <span>部署後用手機打開網址，iPhone 可用 Safari「加入主畫面」，Android 可用 Chrome「安裝應用程式」。之後打開就像 App 一樣使用。</span>
+            </div>
+            <div class="status-panel">
+              <strong>正式同步規格</strong>
+              <span>我已把正式版資料來源、每日同步、異動提醒、路線推薦規則整理成文件。</span>
+              <a class="map-link" href="./sync-spec.md" target="_blank" rel="noreferrer">查看同步規格</a>
+            </div>
+            <div class="status-panel">
+              <strong>資料同步骨架</strong>
+              <span>已建立資料格式、來源清單、設定範例與今日示範資料。正式部署後會由後端排程讀取這些規格。</span>
+              <a class="map-link" href="./data/sources.json" target="_blank" rel="noreferrer">來源清單</a>
+              <a class="map-link" href="./data/schema.json" target="_blank" rel="noreferrer">資料格式</a>
+              <a class="map-link" href="./data/today-sample.json" target="_blank" rel="noreferrer">今日示範資料</a>
+            </div>
+          </section>
+
+          <section class="view search-panel" data-view="search" aria-label="搜尋想去的高雄地點">
+            <div class="sync-rule">
+              <strong>全高雄景點美食同步規則</strong>
+              <span>正式版會一次同步 38 區資料。搜尋結果只應列出「有明確名稱」的店家或景點，不再用「XX區美食」這種泛稱當推薦。</span>
+              <div class="field-list">
+                <div>美食細項：正確店名、行政區、地址、類型、營業時間、今日是否營業、是否暫停/永久停業、Google 地圖連結、評分、評論數。</div>
+                <div>景點細項：正確景點名、行政區、地址、開放時間、室內/室外、適合時段、拍攝亮點、Google 地圖連結、最後同步時間。</div>
+                <div>推薦規則：每一區都自動抓資料，不需要你一區一區講；低評分、評論太少、疑似停業、資料不完整的點不優先推薦。</div>
+              </div>
+            </div>
+            <div class="search-label">
+              <h2>搜尋想去的地點</h2>
+              <span>景點 / 美食 / 活動</span>
+            </div>
+            <div class="search-box">
+              <input id="placeSearch" type="search" placeholder="輸入地點、區域、夜市、咖啡、親子..." />
+              <button id="searchBtn" type="button">搜尋</button>
+            </div>
+            <div class="filters">
+              <select id="districtFilter" aria-label="選擇高雄行政區">
+                <option value="">高雄全區</option>
+                <option value="鹽埕區">鹽埕區</option>
+                <option value="鼓山區">鼓山區</option>
+                <option value="左營區">左營區</option>
+                <option value="楠梓區">楠梓區</option>
+                <option value="三民區">三民區</option>
+                <option value="新興區">新興區</option>
+                <option value="前金區">前金區</option>
+                <option value="苓雅區">苓雅區</option>
+                <option value="前鎮區">前鎮區</option>
+                <option value="旗津區">旗津區</option>
+                <option value="小港區">小港區</option>
+                <option value="鳳山區">鳳山區</option>
+                <option value="林園區">林園區</option>
+                <option value="大寮區">大寮區</option>
+                <option value="大樹區">大樹區</option>
+                <option value="大社區">大社區</option>
+                <option value="仁武區">仁武區</option>
+                <option value="鳥松區">鳥松區</option>
+                <option value="岡山區">岡山區</option>
+                <option value="橋頭區">橋頭區</option>
+                <option value="燕巢區">燕巢區</option>
+                <option value="田寮區">田寮區</option>
+                <option value="阿蓮區">阿蓮區</option>
+                <option value="路竹區">路竹區</option>
+                <option value="湖內區">湖內區</option>
+                <option value="茄萣區">茄萣區</option>
+                <option value="永安區">永安區</option>
+                <option value="彌陀區">彌陀區</option>
+                <option value="梓官區">梓官區</option>
+                <option value="旗山區">旗山區</option>
+                <option value="美濃區">美濃區</option>
+                <option value="六龜區">六龜區</option>
+                <option value="甲仙區">甲仙區</option>
+                <option value="杉林區">杉林區</option>
+                <option value="內門區">內門區</option>
+                <option value="茂林區">茂林區</option>
+                <option value="桃源區">桃源區</option>
+                <option value="那瑪夏區">那瑪夏區</option>
+              </select>
+              <select id="categoryFilter" aria-label="選擇類型">
+                <option value="">全部類型</option>
+                <option value="景點">景點</option>
+                <option value="美食">美食</option>
+                <option value="百貨商場">百貨商場</option>
+                <option value="活動">活動</option>
+                <option value="雨天">雨天備案</option>
+                <option value="親子">親子</option>
+                <option value="結束營業">結束營業/停業</option>
+              </select>
+            </div>
+            <div class="quick-tags" aria-label="快速搜尋">
+              <button type="button" data-query="駁二">駁二</button>
+              <button type="button" data-query="全區景點美食">全區景點美食</button>
+              <button type="button" data-query="全區熱門美食">全區熱門美食</button>
+              <button type="button" data-query="旗津">旗津</button>
+              <button type="button" data-query="衛武營">衛武營</button>
+              <button type="button" data-query="瑞豐">瑞豐</button>
+              <button type="button" data-query="百貨">百貨</button>
+              <button type="button" data-query="室內">室內</button>
+              <button type="button" data-query="咖啡">咖啡</button>
+              <button type="button" data-query="小吃">小吃</button>
+              <button type="button" data-query="夜市">夜市</button>
+              <button type="button" data-query="海鮮">海鮮</button>
+              <button type="button" data-query="老店">老店</button>
+              <button type="button" data-query="市場">市場</button>
+              <button type="button" data-query="夜景">夜景</button>
+              <button type="button" data-query="親子">親子</button>
+            </div>
+            <div class="search-results" id="searchResults"></div>
+          </section>
+
+          <section class="view" data-view="routes" aria-label="今日推薦路線">
+            <div class="section-title">
+              <h2>今日推薦路線</h2>
+              <button type="button" id="refreshBtn">換一組</button>
+            </div>
+
+            <div class="tabs" aria-label="行程分類">
+              <button class="tab active" type="button">船長主推</button>
+              <button class="tab" type="button">雨天備案</button>
+              <button class="tab" type="button">美食景點</button>
+              <button class="tab" type="button">捷運輕軌</button>
+            </div>
+
+            <div class="route-list" id="routeList"></div>
+
+            <section class="detail" aria-live="polite">
+              <div class="detail-top">
+                <h2 id="detailTitle"></h2>
+                <p id="detailReason"></p>
+              </div>
+              <div class="timeline" id="timeline"></div>
+            </section>
+
+            <div class="drawer" id="outputBox"></div>
+
+            <div class="actions">
+              <button class="action" type="button" data-output="post">產生 FB 文案</button>
+              <button class="action secondary" type="button" data-output="shot">拍攝清單</button>
+              <button class="action secondary" type="button" data-output="cover">圖卡文字</button>
+              <button class="action" type="button" data-output="save">通知我異動</button>
+            </div>
+          </section>
+
+          <nav class="bottom-nav" aria-label="主要導覽">
+            <button class="active" type="button" data-nav="home">首頁</button>
+            <button type="button" data-nav="search">搜尋</button>
+            <button type="button" data-nav="routes">航線</button>
+            <button type="button" data-nav="radar">雷達</button>
+          </nav>
+        </section>
+      </section>
+    </main>
+
+    <script>
+      const routes = [
+        {
+          icon: "⚓",
+          title: "鹽埕 × 駁二 × 旗津夕陽",
+          tag: "港邊散步、展覽、美食、夕陽一次收",
+          scores: ["順路 94", "好拍 96", "發文 93"],
+          weatherFit: "午後有雨機率時，先排駁二室內展，傍晚再看旗津海邊狀況。",
+          hoursFit: "展館與店家建議出發前再確認營業中，旗津夕陽適合 17:00 後。",
+          adjustment: "今日建議：上午吃鹽埕，下午先室內，傍晚雨停再往旗津走。",
+          reason:
+            "這條從鹽埕出發，沿著駁二、哈瑪星一路接到旗津，移動距離短，機車與輕軌都可搭配，傍晚剛好能拍港邊夕陽。",
+          stops: [
+            ["10:30", "鹽埕早午餐", "先用在地美食開場，適合拍近景與店門口。"],
+            ["12:00", "駁二展覽 / 倉庫群", "室內外都有畫面，天氣熱也能穿插休息。"],
+            ["14:30", "哈瑪星散步", "老街、鐵道、港邊都是很好取景的段落。"],
+            ["16:30", "旗津渡輪", "移動本身就是素材，可以拍上船與海景。"],
+            ["17:30", "旗津海岸夕陽", "當作整篇貼文的收尾畫面。"],
+            ["18:40", "旗津晚餐", "用海味或小吃補上美食段落。"]
+          ],
+          post:
+            "船員們集合！今天船長幫大家排一條高雄港邊一日遊，從鹽埕美食一路玩到駁二、哈瑪星，傍晚再到旗津看夕陽。這條路線順、畫面多，也很適合週末照著走。",
+          shot:
+            "拍攝重點：早午餐近拍、駁二入口、倉庫街景、哈瑪星巷弄、渡輪畫面、旗津夕陽、晚餐收尾。",
+          cover:
+            "封面主標：高雄港邊一日遊這樣排｜副標：鹽埕美食 × 駁二展覽 × 旗津夕陽"
+        },
+        {
+          icon: "☂",
+          title: "衛武營 × 鳳山美食 × 大東散步",
+          tag: "下雨也不怕的室內半戶外路線",
+          scores: ["順路 88", "好拍 84", "發文 89"],
+          weatherFit: "午後下雨也能走，衛武營與大東都有室內或遮蔽空間。",
+          hoursFit: "展演、展覽與餐廳營業時間要優先確認，晚餐再回鳳山較順。",
+          adjustment: "今日建議：如果雨勢明顯，衛武營停留時間拉長，大東改成雨停後再拍。",
+          reason:
+            "衛武營與鳳山、大東區域接近，適合午後可能下雨的日子。中午安排美食，下午以室內空間和捷運可到點為主。",
+          stops: [
+            ["11:00", "鳳山午餐", "先吃飽，選有特色的小店或市場周邊。"],
+            ["12:30", "衛武營", "建築線條很有辨識度，室內外都能拍。"],
+            ["15:00", "鳳山咖啡 / 甜點", "避開午後雨，也能補生活感照片。"],
+            ["16:30", "大東文化藝術中心", "光影、廣場和捷運站周邊都好拍。"],
+            ["18:00", "鳳山晚餐", "收成一條輕鬆雨天路線。"]
+          ],
+          post:
+            "今天午後如果怕下雨，船長推薦這條鳳山室內備案航線。衛武營、大東加上鳳山美食，路線不會太趕，也很適合想輕鬆拍照的人。",
+          shot:
+            "拍攝重點：衛武營建築外觀、室內光影、咖啡甜點、大東廣場、捷運出口、晚餐特寫。",
+          cover:
+            "封面主標：高雄雨天一日遊｜副標：衛武營 × 鳳山美食 × 大東散步"
+        },
+        {
+          icon: "🍜",
+          title: "巨蛋 × 凹子底 × 瑞豐夜市",
+          tag: "下午逛街、傍晚散步、晚上吃美食",
+          scores: ["順路 91", "好拍 82", "發文 87"],
+          weatherFit: "白天熱或下雨時先排百貨商圈，傍晚雨停再去凹子底或夜市。",
+          hoursFit: "瑞豐夜市屬晚間行程，適合 18:00 後再安排主拍攝。",
+          adjustment: "今日建議：不用太早出發，下午室內、晚上夜市，節奏比較舒服。",
+          reason:
+            "這條適合不想太早出門的日子，巨蛋、凹子底、瑞豐夜市都在同生活圈，機車與捷運都方便。",
+          stops: [
+            ["14:00", "巨蛋周邊逛逛", "百貨或快閃活動可作為開場。"],
+            ["15:30", "凹子底公園", "補戶外散步畫面，讓行程不只吃。"],
+            ["17:00", "咖啡 / 甜點休息", "等夜市開攤前的中繼點。"],
+            ["18:30", "瑞豐夜市", "主打夜間美食與人潮氛圍。"],
+            ["20:00", "巨蛋夜景收尾", "適合做短影音結尾。"]
+          ],
+          post:
+            "不想早起也能玩高雄！船長今天排的是巨蛋、凹子底、瑞豐夜市路線，下午散步拍照，晚上直接開吃，很適合朋友臨時約一波。",
+          shot:
+            "拍攝重點：商圈街景、凹子底綠地、甜點飲品、夜市招牌、人潮、美食咬一口畫面。",
+          cover:
+            "封面主標：高雄下午出發也能玩｜副標：巨蛋 × 凹子底 × 瑞豐夜市"
+        }
+      ];
+
+      const places = [
+        {
+          name: "丹丹漢堡 七賢店",
+          category: "美食",
+          type: "在地品牌 / 速食 / 早餐",
+          district: "前金區",
+          area: "七賢路、市中心",
+          keywords: "丹丹漢堡 七賢店 前金 高雄在地 速食 早餐 全區熱門美食",
+          reason: "高雄代表性在地速食品牌，適合做外地朋友來高雄的美食切入點。",
+          pair: "丹丹漢堡七賢店 → 中央公園 → 愛河 → 高流夜景",
+          mapQuery: "丹丹漢堡 七賢店 高雄",
+          hours: "正式版由 Google 地圖同步"
+        },
+        {
+          name: "高雄婆婆冰 旗艦店",
+          category: "美食",
+          type: "冰品 / 甜點 / 老店",
+          district: "鹽埕區",
+          area: "鹽埕埔",
+          keywords: "高雄婆婆冰 旗艦店 鹽埕 冰品 老店 全區熱門美食",
+          reason: "鹽埕經典冰品，適合炎熱天氣或港邊散步路線安排。",
+          pair: "鹽埕午餐 → 高雄婆婆冰 → 駁二 → 棧貳庫",
+          mapQuery: "高雄婆婆冰 旗艦店",
+          hours: "正式版由 Google 地圖同步"
+        },
+        {
+          name: "海之冰",
+          category: "美食",
+          type: "冰品 / 甜點 / 西子灣",
+          district: "鼓山區",
+          area: "西子灣、哈瑪星",
+          keywords: "海之冰 鼓山 西子灣 冰品 甜點 全區熱門美食",
+          reason: "西子灣、哈瑪星路線常見甜點補給點，適合夕陽前後安排。",
+          pair: "哈瑪星 → 海之冰 → 西子灣夕陽 → 鼓山渡輪站",
+          mapQuery: "海之冰 高雄",
+          hours: "正式版由 Google 地圖同步"
+        },
+        {
+          name: "不二緻果 高雄不二家",
+          category: "美食",
+          type: "甜點 / 伴手禮 / 蛋糕",
+          district: "新興區",
+          area: "新興、市中心",
+          keywords: "不二緻果 高雄不二家 新興 甜點 伴手禮 蛋糕 全區熱門美食",
+          reason: "高雄經典伴手禮與甜點店，適合做市區美食或伴手禮題材。",
+          pair: "不二緻果 → 美麗島站 → 中央公園 → 六合夜市",
+          mapQuery: "不二緻果 高雄不二家",
+          hours: "正式版由 Google 地圖同步"
+        },
+        {
+          name: "王義雞肉飯",
+          category: "美食",
+          type: "雞肉飯 / 小吃 / 老店",
+          district: "新興區",
+          area: "新興、市中心",
+          keywords: "王義雞肉飯 新興 高雄 雞肉飯 小吃 全區熱門美食",
+          reason: "市中心小吃選項，適合接美麗島、六合、中央公園路線。",
+          pair: "王義雞肉飯 → 美麗島站 → 六合夜市 → 中央公園",
+          mapQuery: "王義雞肉飯 高雄",
+          hours: "正式版由 Google 地圖同步"
+        },
+        {
+          name: "老周燒肉飯",
+          category: "美食",
+          type: "燒肉飯 / 小吃 / 便當",
+          district: "苓雅區",
+          area: "苓雅、市區",
+          keywords: "老周燒肉飯 苓雅 高雄 燒肉飯 小吃 全區熱門美食",
+          reason: "高雄燒肉飯代表選項之一，適合市區午餐路線。",
+          pair: "老周燒肉飯 → 文化中心 → 三多商圈 → 愛河灣",
+          mapQuery: "老周燒肉飯 高雄",
+          hours: "正式版由 Google 地圖同步"
+        },
+        {
+          name: "鄧師傅功夫菜",
+          category: "美食",
+          type: "便當 / 滷味 / 在地品牌",
+          district: "苓雅區",
+          area: "苓雅、市區",
+          keywords: "鄧師傅功夫菜 高雄 苓雅 便當 滷味 全區熱門美食",
+          reason: "適合市區便當與老味道題材，正式版會依地圖同步分店資訊。",
+          pair: "鄧師傅功夫菜 → 文化中心 → 三多商圈",
+          mapQuery: "鄧師傅功夫菜 高雄",
+          hours: "正式版由 Google 地圖同步"
+        },
+        {
+          name: "阿霞燒肉飯",
+          category: "美食",
+          type: "燒肉飯 / 小吃 / 在地",
+          district: "前鎮區",
+          area: "前鎮、草衙",
+          keywords: "阿霞燒肉飯 前鎮 高雄 小吃 全區熱門美食",
+          reason: "前鎮在地小吃題材，可接草衙、夢時代或港區路線。",
+          pair: "阿霞燒肉飯 → SKM Park → 夢時代 → 愛河灣",
+          mapQuery: "阿霞燒肉飯 高雄 前鎮",
+          hours: "正式版由 Google 地圖同步"
+        },
+        {
+          name: "旗津萬三小吃部",
+          category: "美食",
+          type: "海鮮 / 熱炒 / 旗津",
+          district: "旗津區",
+          area: "旗津",
+          keywords: "萬三小吃部 旗津 海鮮 高雄 全區熱門美食",
+          reason: "旗津海鮮路線常見選項，適合接渡輪、老街、夕陽。",
+          pair: "旗津渡輪 → 萬三小吃部 → 旗津海岸 → 旗津老街",
+          mapQuery: "旗津萬三小吃部",
+          hours: "正式版由 Google 地圖同步"
+        },
+        {
+          name: "旗津萬二小吃部",
+          category: "美食",
+          type: "海鮮 / 熱炒 / 旗津",
+          district: "旗津區",
+          area: "旗津、旗津老街",
+          keywords: "旗津萬二小吃部 萬二小吃部 旗津 海鮮 熱炒 全區熱門美食",
+          reason: "旗津海鮮熱炒名單之一，適合安排在旗津午餐或晚餐路線。",
+          pair: "旗津渡輪 → 旗津萬二小吃部 → 旗津老街 → 旗津海岸",
+          mapQuery: "旗津萬二小吃部",
+          hours: "正式版由 Google 地圖同步"
+        },
+        {
+          name: "旗后活海產",
+          category: "美食",
+          type: "海鮮 / 活海產 / 聚餐",
+          district: "旗津區",
+          area: "旗津、廟前路",
+          keywords: "旗后活海產 旗津 海鮮 活海產 旗津老街",
+          reason: "適合需要海鮮聚餐型行程時使用，可搭旗津天后宮與老街散步。",
+          pair: "旗津天后宮 → 旗后活海產 → 旗津老街 → 旗津海岸",
+          mapQuery: "旗后活海產 高雄 旗津",
+          hours: "正式版由 Google 地圖同步"
+        },
+        {
+          name: "斗六冰城 旗津店",
+          category: "美食",
+          type: "冰品 / 甜點 / 旗津",
+          district: "旗津區",
+          area: "旗津老街",
+          keywords: "斗六冰城 旗津店 旗津 冰品 甜點",
+          reason: "適合旗津老街散步後的冰品補給，夏天或午後路線很好用。",
+          pair: "旗津老街 → 斗六冰城旗津店 → 旗津海岸 → 彩虹教堂",
+          mapQuery: "斗六冰城 旗津店",
+          hours: "正式版由 Google 地圖同步"
+        },
+        {
+          name: "不一樣赤肉羹",
+          category: "美食",
+          type: "小吃 / 赤肉羹 / 旗津",
+          district: "旗津區",
+          area: "旗津老街",
+          keywords: "不一樣赤肉羹 旗津 赤肉羹 小吃 旗津老街",
+          reason: "適合當旗津小吃路線的一站，和烤小卷、黑輪、冰品可串成老街美食散步。",
+          pair: "旗津渡輪 → 不一樣赤肉羹 → 旗津老街 → 斗六冰城",
+          mapQuery: "不一樣赤肉羹 旗津",
+          hours: "正式版由 Google 地圖同步"
+        },
+        {
+          name: "椪嫂蕃茄切盤",
+          category: "美食",
+          type: "番茄切盤 / 特色小吃 / 旗津",
+          district: "旗津區",
+          area: "旗津老街",
+          keywords: "椪嫂蕃茄切盤 旗津 番茄切盤 薑汁番茄 特色小吃",
+          reason: "番茄切盤是南部特色吃法，適合做旗津小吃介紹與短影音素材。",
+          pair: "旗津老街 → 椪嫂蕃茄切盤 → 旗津海岸 → 旗后燈塔",
+          mapQuery: "椪嫂蕃茄切盤 旗津",
+          hours: "正式版由 Google 地圖同步"
+        },
+        {
+          name: "旗津烤小卷",
+          category: "美食",
+          type: "烤小卷 / 海味小吃 / 旗津",
+          district: "旗津區",
+          area: "旗津老街",
+          keywords: "旗津烤小卷 烤小卷 旗津 海味 小吃",
+          reason: "旗津代表性海味小吃之一，正式版會再同步 Google 地圖上的實際攤位或店家名稱。",
+          pair: "旗津老街 → 旗津烤小卷 → 旗津海岸 → 彩虹教堂",
+          mapQuery: "旗津烤小卷",
+          hours: "正式版由 Google 地圖同步"
+        },
+        {
+          name: "旗津旗魚黑輪",
+          category: "美食",
+          type: "旗魚黑輪 / 海味小吃 / 旗津",
+          district: "旗津區",
+          area: "旗津老街",
+          keywords: "旗津旗魚黑輪 旗魚黑輪 旗津 小吃 海味",
+          reason: "旗津常見特色小吃，適合和烤小卷、冰品組成老街美食線。",
+          pair: "旗津渡輪 → 旗津旗魚黑輪 → 旗津老街 → 旗津海岸",
+          mapQuery: "旗津旗魚黑輪",
+          hours: "正式版由 Google 地圖同步"
+        },
+        {
+          name: "阿英排骨飯",
+          category: "美食",
+          type: "排骨飯 / 小吃 / 在地",
+          district: "小港區",
+          area: "小港",
+          keywords: "阿英排骨飯 小港 高雄 排骨飯 小吃 全區熱門美食",
+          reason: "小港在地午餐題材，可接淨園、機場、林園海線路線。",
+          pair: "小港午餐 → 淨園農場 → 小港咖啡 → 林園海線",
+          mapQuery: "阿英排骨飯 高雄 小港",
+          hours: "正式版由 Google 地圖同步"
+        },
+        {
+          name: "阿婆仔冰",
+          category: "美食",
+          type: "冰品 / 旗山 / 老街",
+          district: "旗山區",
+          area: "旗山老街",
+          keywords: "阿婆仔冰 旗山 冰品 老街 高雄 全區熱門美食",
+          reason: "旗山老街常見甜點冰品題材，適合山線一日遊。",
+          pair: "旗山老街 → 阿婆仔冰 → 美濃老街",
+          mapQuery: "阿婆仔冰 旗山",
+          hours: "正式版由 Google 地圖同步"
+        },
+        {
+          name: "枝仔冰城 旗山總店",
+          category: "美食",
+          type: "冰品 / 甜點 / 伴手禮",
+          district: "旗山區",
+          area: "旗山",
+          keywords: "枝仔冰城 旗山總店 冰品 甜點 全區熱門美食",
+          reason: "旗山代表性冰品與伴手禮，可接旗山老街、美濃路線。",
+          pair: "旗山老街 → 枝仔冰城旗山總店 → 美濃粄條",
+          mapQuery: "枝仔冰城 旗山總店",
+          hours: "正式版由 Google 地圖同步"
+        },
+        {
+          name: "美濃吳粄條",
+          category: "美食",
+          type: "客家 / 粄條 / 地方特色",
+          district: "美濃區",
+          area: "美濃",
+          keywords: "美濃吳粄條 美濃 客家 粄條 全區熱門美食",
+          reason: "美濃客家美食代表選項之一，適合山線文化美食路線。",
+          pair: "美濃吳粄條 → 美濃老街 → 旗山老街",
+          mapQuery: "美濃吳粄條",
+          hours: "正式版由 Google 地圖同步"
+        },
+        {
+          name: "岡山舊市羊肉",
+          category: "美食",
+          type: "羊肉 / 岡山 / 老店",
+          district: "岡山區",
+          area: "岡山",
+          keywords: "岡山舊市羊肉 舊市羊肉 岡山 羊肉 全區熱門美食",
+          reason: "岡山羊肉代表店，適合北高雄路線的美食主角。",
+          pair: "橋頭糖廠 → 岡山舊市羊肉 → 阿公店水庫",
+          mapQuery: "岡山舊市羊肉",
+          hours: "正式版由 Google 地圖同步"
+        },
+        {
+          name: "橋頭太成肉包",
+          category: "美食",
+          type: "肉包 / 小吃 / 老店",
+          district: "橋頭區",
+          area: "橋頭",
+          keywords: "橋頭太成肉包 橋頭 肉包 小吃 全區熱門美食",
+          reason: "橋頭糖廠與橋頭老街附近可作為小吃補給。",
+          pair: "橋頭糖廠 → 太成肉包 → 岡山羊肉",
+          mapQuery: "橋頭太成肉包",
+          hours: "正式版由 Google 地圖同步"
+        },
+        {
+          name: "北港蔡三代筒仔米糕",
+          category: "美食",
+          type: "熱門小吃 / 筒仔米糕 / 老店",
+          district: "鹽埕區",
+          area: "鹽埕埔",
+          keywords: "北港蔡 北港蔡三代 筒仔米糕 鹽埕 小吃 老店 米糕",
+          reason: "鹽埕代表性小吃之一，適合排在駁二、鹽埕散步路線的午餐或點心。",
+          pair: "北港蔡三代筒仔米糕 → 駁二 → 棧貳庫 → 西子灣",
+          mapQuery: "北港蔡三代筒仔米糕 高雄 鹽埕",
+          hours: "正式版由 Google 地圖同步"
+        },
+        {
+          name: "鴨肉珍",
+          category: "美食",
+          type: "熱門小吃 / 鴨肉飯 / 老店",
+          district: "鹽埕區",
+          area: "鹽埕埔",
+          keywords: "鴨肉珍 鹽埕 鴨肉飯 小吃 老店 高雄美食",
+          reason: "高雄鹽埕很有名的鴨肉飯店，適合做在地美食主題。",
+          pair: "鴨肉珍 → 鹽埕散步 → 駁二 → 愛河灣",
+          mapQuery: "鴨肉珍 高雄 鹽埕",
+          hours: "正式版由 Google 地圖同步"
+        },
+        {
+          name: "樺達奶茶",
+          category: "美食",
+          type: "飲料 / 老店 / 下午茶",
+          district: "鹽埕區",
+          area: "鹽埕埔",
+          keywords: "樺達奶茶 鹽埕 飲料 老店 奶茶 下午茶",
+          reason: "適合當鹽埕路線的飲料補給，也能搭配駁二散步。",
+          pair: "鹽埕小吃 → 樺達奶茶 → 駁二 → 哈瑪星",
+          mapQuery: "樺達奶茶 高雄 鹽埕",
+          hours: "正式版由 Google 地圖同步"
+        },
+        {
+          name: "阿綿麻糬",
+          category: "美食",
+          type: "甜點 / 麻糬 / 老店",
+          district: "鹽埕區",
+          area: "鹽埕埔",
+          keywords: "阿綿麻糬 鹽埕 麻糬 甜點 老店",
+          reason: "適合做鹽埕甜點收尾，照片也容易拍出在地感。",
+          pair: "北港蔡三代筒仔米糕 → 阿綿麻糬 → 駁二",
+          mapQuery: "阿綿麻糬 高雄 鹽埕",
+          hours: "正式版由 Google 地圖同步"
+        },
+        {
+          name: "婆婆冰",
+          category: "美食",
+          type: "冰品 / 甜點 / 老店",
+          district: "鹽埕區",
+          area: "鹽埕埔",
+          keywords: "婆婆冰 鹽埕 冰品 甜點 高雄冰店",
+          reason: "天氣熱時很適合放進鹽埕散步路線，當作午後降溫點。",
+          pair: "鹽埕午餐 → 婆婆冰 → 駁二 → 棧貳庫",
+          mapQuery: "婆婆冰 高雄 鹽埕",
+          hours: "正式版由 Google 地圖同步"
+        },
+        {
+          name: "老江紅茶牛奶",
+          category: "美食",
+          type: "早餐 / 飲料 / 老店",
+          district: "新興區",
+          area: "美麗島、南台路",
+          keywords: "老江紅茶牛奶 高雄 新興 早餐 紅茶牛奶 老店",
+          reason: "適合做市中心早餐開場，接美麗島、中央公園很順。",
+          pair: "老江紅茶牛奶 → 美麗島站 → 中央公園 → 新崛江",
+          mapQuery: "老江紅茶牛奶 高雄",
+          hours: "正式版由 Google 地圖同步"
+        },
+        {
+          name: "興隆居",
+          category: "美食",
+          type: "早餐 / 湯包 / 老店",
+          district: "前金區",
+          area: "前金、市中心",
+          keywords: "興隆居 高雄 早餐 湯包 前金 老店",
+          reason: "高雄熱門早餐店，適合排早上開始的一日遊。",
+          pair: "興隆居早餐 → 中央公園 → 漢神本館 → 愛河",
+          mapQuery: "興隆居 高雄",
+          hours: "正式版由 Google 地圖同步"
+        },
+        {
+          name: "汕頭泉成沙茶火鍋",
+          category: "美食",
+          type: "火鍋 / 老店 / 晚餐",
+          district: "新興區",
+          area: "新興、市中心",
+          keywords: "汕頭泉成 沙茶火鍋 高雄 新興 老店 晚餐",
+          reason: "適合市中心晚餐，能搭美麗島、中央公園或六合夜市。",
+          pair: "中央公園 → 汕頭泉成沙茶火鍋 → 美麗島夜拍",
+          mapQuery: "汕頭泉成沙茶火鍋 高雄",
+          hours: "正式版由 Google 地圖同步"
+        },
+        {
+          name: "劉家酸白菜火鍋",
+          category: "美食",
+          type: "眷村 / 火鍋 / 老店",
+          district: "左營區",
+          area: "左營、蓮池潭",
+          keywords: "劉家酸白菜火鍋 左營 眷村 火鍋 老店",
+          reason: "左營眷村味代表店家，適合和蓮池潭、左營舊城串成文化美食路線。",
+          pair: "蓮池潭 → 左營舊城 → 劉家酸白菜火鍋",
+          mapQuery: "劉家酸白菜火鍋 高雄 左營",
+          hours: "正式版由 Google 地圖同步"
+        },
+        {
+          name: "寬來順早餐店",
+          category: "美食",
+          type: "眷村 / 早餐 / 燒餅",
+          district: "左營區",
+          area: "左營",
+          keywords: "寬來順 左營 早餐 燒餅 眷村 高雄",
+          reason: "適合左營早晨路線，拍完早餐可以接蓮池潭。",
+          pair: "寬來順早餐 → 蓮池潭 → 左營舊城 → 巨蛋",
+          mapQuery: "寬來順早餐店 高雄 左營",
+          hours: "正式版由 Google 地圖同步"
+        },
+        {
+          name: "汾陽餛飩",
+          category: "美食",
+          type: "小吃 / 餛飩 / 老店",
+          district: "左營區",
+          area: "左營",
+          keywords: "汾陽餛飩 左營 餛飩 小吃 老店",
+          reason: "適合放在左營舊城與蓮池潭周邊的在地小吃路線。",
+          pair: "左營舊城 → 汾陽餛飩 → 蓮池潭",
+          mapQuery: "汾陽餛飩 高雄 左營",
+          hours: "正式版由 Google 地圖同步"
+        },
+        {
+          name: "丹丹漢堡 西子灣店",
+          category: "美食",
+          type: "速食 / 在地品牌 / 小吃",
+          district: "鼓山區",
+          area: "西子灣、哈瑪星",
+          keywords: "丹丹漢堡 西子灣 鼓山 高雄在地 速食",
+          reason: "高雄在地速食品牌，適合搭西子灣、哈瑪星做輕鬆路線。",
+          pair: "哈瑪星 → 丹丹漢堡西子灣店 → 西子灣夕陽",
+          mapQuery: "丹丹漢堡 西子灣店",
+          hours: "正式版由 Google 地圖同步"
+        },
+        {
+          name: "舊市羊肉",
+          category: "美食",
+          type: "羊肉 / 老店 / 岡山名物",
+          district: "岡山區",
+          area: "岡山",
+          keywords: "舊市羊肉 岡山 羊肉 老店 高雄美食",
+          reason: "岡山羊肉代表店之一，適合北高雄一日遊的美食主角。",
+          pair: "橋頭糖廠 → 舊市羊肉 → 阿公店水庫",
+          mapQuery: "舊市羊肉 高雄 岡山",
+          hours: "正式版由 Google 地圖同步"
+        },
+        {
+          name: "老牌周燒肉飯",
+          category: "美食",
+          type: "燒肉飯 / 小吃 / 在地",
+          district: "鳳山區",
+          area: "鳳山",
+          keywords: "老牌周燒肉飯 鳳山 燒肉飯 小吃 高雄",
+          reason: "適合鳳山文化路線的午餐，能接鳳儀書院、大東或衛武營。",
+          pair: "鳳儀書院 → 老牌周燒肉飯 → 大東文化藝術中心",
+          mapQuery: "老牌周燒肉飯 高雄 鳳山",
+          hours: "正式版由 Google 地圖同步"
+        },
+        {
+          name: "美濃粄條",
+          category: "美食",
+          type: "客家 / 粄條 / 地方特色",
+          district: "美濃區",
+          area: "美濃",
+          keywords: "美濃粄條 美濃 客家 美食 高雄山線",
+          reason: "美濃代表性美食，正式版會列出 Google Maps 推薦的實際店家。",
+          pair: "美濃粄條 → 美濃老街 → 旗山老街",
+          mapQuery: "美濃粄條 高雄 美濃",
+          hours: "正式版由 Google 地圖同步"
+        },
+        {
+          name: "正忠排骨飯 創始店",
+          category: "美食",
+          type: "便當 / 排骨飯 / 在地品牌",
+          district: "三民區",
+          area: "正忠路、大昌生活圈",
+          keywords: "正忠排骨飯 創始店 三民 正忠路 排骨飯 便當 高雄美食",
+          reason: "三民區正忠路代表性便當店，適合排科工館、建工、大昌生活圈的午餐。",
+          pair: "科工館 → 正忠排骨飯創始店 → 金獅湖 → 吉林夜市",
+          mapQuery: "正忠排骨飯 創始店 高雄 三民",
+          hours: "正式版由 Google 地圖同步"
+        },
+        {
+          name: "老新台菜 十全店",
+          category: "美食",
+          type: "台菜 / 聚餐 / 老店",
+          district: "三民區",
+          area: "十全路、後驛",
+          keywords: "老新台菜 十全店 三民 台菜 聚餐 高雄美食",
+          reason: "適合需要安排聚餐型美食或家庭客群路線時使用。",
+          pair: "高雄車站 → 老新台菜十全店 → 三鳳中街 → 愛河之心",
+          mapQuery: "老新台菜 十全店 高雄",
+          hours: "正式版由 Google 地圖同步"
+        },
+        {
+          name: "春水堂人文茶館 河堤店",
+          category: "美食",
+          type: "茶館 / 下午茶 / 親子",
+          district: "三民區",
+          area: "河堤、明仁路",
+          keywords: "春水堂 河堤店 三民 明仁路 下午茶 茶館 親子",
+          reason: "河堤社區適合下午茶和輕鬆散步，能搭愛河之心與凹子底。",
+          pair: "愛河之心 → 春水堂河堤店 → 河堤散步 → 巨蛋商圈",
+          mapQuery: "春水堂人文茶館 河堤店 高雄",
+          hours: "正式版由 Google 地圖同步"
+        },
+        {
+          name: "路易莎咖啡 高雄河堤店",
+          category: "美食",
+          type: "咖啡 / 休息點 / 雨天備案",
+          district: "三民區",
+          area: "河堤、明仁路",
+          keywords: "路易莎咖啡 高雄河堤店 三民 河堤 咖啡 雨天",
+          reason: "適合當河堤、愛河之心、巨蛋一帶的拍攝休息點。",
+          pair: "愛河之心 → 路易莎咖啡高雄河堤店 → 凹子底 → 瑞豐夜市",
+          mapQuery: "路易莎咖啡 高雄河堤店",
+          hours: "正式版由 Google 地圖同步"
+        },
+        {
+          name: "吉林夜市",
+          category: "美食",
+          type: "夜市 / 小吃 / 宵夜",
+          district: "三民區",
+          area: "高醫、吉林街",
+          keywords: "吉林夜市 三民 高醫 夜市 小吃 宵夜 晚餐",
+          reason: "適合做三民區晚間美食路線，正式版會再拆成各攤正確店名。",
+          pair: "科工館 → 高醫周邊 → 吉林夜市 → 後驛散步",
+          mapQuery: "吉林夜市 高雄 三民",
+          hours: "正式版由 Google 地圖同步"
+        },
+        {
+          name: "三鳳中街",
+          category: "美食",
+          type: "乾貨 / 伴手禮 / 年節採買",
+          district: "三民區",
+          area: "三塊厝、建國三路",
+          keywords: "三鳳中街 三民 乾貨 伴手禮 年貨 市場",
+          reason: "適合做節慶採買、伴手禮、年貨街主題內容。",
+          pair: "三塊厝車站 → 三鳳中街 → 三民市場 → 愛河",
+          mapQuery: "三鳳中街 高雄",
+          hours: "正式版由 Google 地圖同步"
+        },
+        {
+          name: "三民市場",
+          category: "美食",
+          type: "傳統市場 / 小吃 / 早餐",
+          district: "三民區",
+          area: "三塊厝",
+          keywords: "三民市場 三民 早餐 小吃 傳統市場",
+          reason: "適合早上採線，正式版會再從 Google 地圖拆出熱門攤商和店名。",
+          pair: "三民市場早餐 → 三鳳中街 → 高雄車站 → 愛河之心",
+          mapQuery: "三民市場 高雄",
+          hours: "正式版由 Google 地圖同步"
+        },
+        {
+          name: "大樂購物中心美食",
+          category: "美食",
+          type: "商場 / 餐廳 / 雨天備案",
+          district: "三民區",
+          area: "民族一路、鼎山",
+          keywords: "大樂購物中心 三民 美食 商場 餐廳 雨天",
+          reason: "雨天或親子路線可用，正式版會同步商場內實際餐廳店名。",
+          pair: "科工館 → 大樂購物中心 → 金獅湖 → 河堤",
+          mapQuery: "大樂購物中心 高雄 美食",
+          hours: "正式版由 Google 地圖同步"
+        },
+        {
+          name: "駁二藝術特區",
+          category: "景點",
+          type: "展覽 / 港邊景點",
+          district: "鹽埕區",
+          area: "鹽埕、哈瑪星",
+          keywords: "駁二 展覽 鹽埕 哈瑪星 輕軌 文青 親子",
+          reason: "適合搭配鹽埕美食、哈瑪星散步、旗津夕陽，畫面豐富又順路。",
+          pair: "鹽埕早午餐 → 駁二看展 → 哈瑪星散步 → 旗津夕陽"
+        },
+        {
+          name: "旗津海岸",
+          category: "景點",
+          type: "夕陽 / 海景 / 美食",
+          district: "旗津區",
+          area: "旗津",
+          keywords: "旗津 夕陽 海邊 海鮮 渡輪 沙灘",
+          reason: "適合放在傍晚收尾，渡輪、海岸、晚餐都能變成內容素材。",
+          pair: "哈瑪星渡輪 → 旗津老街 → 海岸夕陽 → 旗津晚餐"
+        },
+        {
+          name: "衛武營國家藝術文化中心",
+          category: "活動",
+          type: "展演 / 建築 / 雨天備案",
+          district: "鳳山區",
+          area: "鳳山、苓雅",
+          keywords: "衛武營 展演 建築 雨天 鳳山 捷運 親子",
+          reason: "建築本身很好拍，附近可串鳳山美食與大東文化藝術中心。",
+          pair: "鳳山午餐 → 衛武營 → 咖啡甜點 → 大東散步"
+        },
+        {
+          name: "瑞豐夜市",
+          category: "美食",
+          type: "夜市 / 美食 / 夜間行程",
+          district: "左營區",
+          area: "左營、巨蛋",
+          keywords: "瑞豐 夜市 美食 巨蛋 左營 晚上 小吃",
+          reason: "適合下午晚點出發的路線，搭巨蛋與凹子底會很順。",
+          pair: "巨蛋商圈 → 凹子底公園 → 瑞豐夜市 → 巨蛋夜景"
+        },
+        {
+          name: "凹子底森林公園",
+          category: "景點",
+          type: "散步 / 親子 / 拍照",
+          district: "鼓山區",
+          area: "鼓山、巨蛋",
+          keywords: "凹子底 公園 親子 散步 巨蛋 瑞豐",
+          reason: "可以當下午戶外散步點，接巨蛋商圈或瑞豐夜市都方便。",
+          pair: "巨蛋午茶 → 凹子底散步 → 瑞豐夜市"
+        },
+        {
+          name: "蓮池潭風景區",
+          category: "景點",
+          type: "湖景 / 廟宇 / 拍照",
+          district: "左營區",
+          area: "左營",
+          keywords: "蓮池潭 龍虎塔 左營 湖景 拍照 親子",
+          reason: "適合排早上或傍晚，搭左營舊城、眷村文化館會順。",
+          pair: "左營早餐 → 蓮池潭 → 左營舊城 → 巨蛋晚餐"
+        },
+        {
+          name: "高雄流行音樂中心",
+          category: "活動",
+          type: "展演 / 港灣夜景",
+          district: "鹽埕區",
+          area: "鹽埕、前金",
+          keywords: "高流 音樂 展演 演唱會 港邊 夜景",
+          reason: "適合搭配愛河灣、駁二和鹽埕美食，晚上畫面很有城市感。",
+          pair: "鹽埕小吃 → 駁二 → 高流活動 → 愛河灣夜景"
+        },
+        {
+          name: "愛河灣",
+          category: "景點",
+          type: "河岸 / 夜景 / 散步",
+          district: "前金區",
+          area: "愛河、前金、鹽埕",
+          keywords: "愛河 愛河灣 夜景 散步 情侶 輕軌",
+          reason: "很適合晚餐後收尾，夜景、橋景和水岸畫面都好拍。",
+          pair: "中央公園 → 前金晚餐 → 愛河灣散步 → 高流夜景"
+        },
+        {
+          name: "中央公園商圈",
+          category: "美食",
+          type: "商圈 / 咖啡 / 逛街",
+          district: "新興區",
+          area: "新興、前金",
+          keywords: "中央公園 新崛江 咖啡 甜點 逛街 美食",
+          reason: "適合安排下午輕鬆路線，周邊咖啡、甜點、商圈都能補素材。",
+          pair: "中央公園散步 → 咖啡甜點 → 新崛江 → 美麗島夜拍"
+        },
+        {
+          name: "六合夜市",
+          category: "美食",
+          type: "夜市 / 觀光小吃",
+          district: "新興區",
+          area: "美麗島、六合",
+          keywords: "六合 夜市 美食 小吃 捷運 美麗島",
+          reason: "適合做外地遊客版的一日遊收尾，捷運可到，資訊容易理解。",
+          pair: "美麗島站 → 中央公園 → 六合夜市"
+        },
+        {
+          name: "SKM Park 周邊",
+          category: "景點",
+          type: "親子 / 購物 / 雨天",
+          district: "前鎮區",
+          area: "草衙、前鎮",
+          keywords: "草衙 親子 購物 雨天 前鎮 室內",
+          reason: "適合親子和雨天備案，搭輕軌或捷運也方便。",
+          pair: "草衙午餐 → SKM Park → 前鎮河畔 → 晚餐"
+        },
+        {
+          name: "淨園農場",
+          category: "景點",
+          type: "親子 / 飛機 / 戶外",
+          district: "小港區",
+          area: "小港",
+          keywords: "淨園 小港 親子 飛機 咖啡 戶外",
+          reason: "有飛機起降與親子元素，適合做輕鬆半日遊。",
+          pair: "小港午餐 → 淨園農場 → 小港咖啡 → 晚餐"
+        },
+        {
+          name: "大東文化藝術中心",
+          category: "景點",
+          type: "建築 / 展覽 / 捷運",
+          district: "鳳山區",
+          area: "鳳山",
+          keywords: "大東 鳳山 展覽 建築 捷運 雨天",
+          reason: "和鳳山美食、衛武營能組成很順的文化路線。",
+          pair: "鳳山午餐 → 大東文化藝術中心 → 衛武營 → 鳳山晚餐"
+        },
+        {
+          name: "澄清湖風景區",
+          category: "景點",
+          type: "湖景 / 散步 / 親子",
+          district: "鳥松區",
+          area: "鳥松、三民",
+          keywords: "澄清湖 鳥松 湖景 親子 散步 戶外",
+          reason: "適合早上或午後散步，附近可串鳥松或三民美食。",
+          pair: "鳥松早餐 → 澄清湖 → 咖啡休息 → 三民晚餐"
+        },
+        {
+          name: "橋頭糖廠",
+          category: "景點",
+          type: "古蹟 / 親子 / 捷運",
+          district: "橋頭區",
+          area: "橋頭、岡山",
+          keywords: "橋頭糖廠 捷運 親子 古蹟 冰品",
+          reason: "捷運可到，適合搭岡山美食或橋頭老街做北高雄路線。",
+          pair: "橋頭糖廠 → 橋頭老街 → 岡山羊肉 → 岡山散步"
+        },
+        {
+          name: "岡山羊肉老店",
+          category: "美食",
+          type: "在地美食 / 老店",
+          district: "岡山區",
+          area: "岡山",
+          keywords: "岡山 羊肉 美食 老店 北高雄",
+          reason: "很適合當北高雄一日遊的美食主題，搭橋頭或阿公店水庫。",
+          pair: "橋頭糖廠 → 岡山羊肉 → 阿公店水庫 → 岡山咖啡"
+        },
+        {
+          name: "美濃老街",
+          category: "景點",
+          type: "客家 / 老街 / 美食",
+          district: "美濃區",
+          area: "美濃",
+          keywords: "美濃 老街 客家 粄條 紙傘 美食",
+          reason: "適合做高雄山線一日遊，景點、美食、文化感都完整。",
+          pair: "美濃粄條 → 美濃老街 → 紙傘文化 → 旗山老街"
+        },
+        {
+          name: "旗山老街",
+          category: "景點",
+          type: "老街 / 香蕉 / 美食",
+          district: "旗山區",
+          area: "旗山",
+          keywords: "旗山 老街 香蕉 美食 山線",
+          reason: "和美濃很適合組成山線一日遊，內容有吃、有拍、有故事。",
+          pair: "旗山老街 → 旗山小吃 → 美濃老街 → 美濃晚餐"
+        },
+        {
+          name: "寶來溫泉",
+          category: "景點",
+          type: "溫泉 / 山線 / 放鬆",
+          district: "六龜區",
+          area: "六龜、寶來",
+          keywords: "六龜 寶來 溫泉 山線 放鬆 景點",
+          reason: "適合做遠一點的放鬆系一日遊，要預留較長交通時間。",
+          pair: "六龜午餐 → 寶來溫泉 → 山城咖啡 → 回程晚餐"
+        },
+        {
+          name: "茂林紫斑蝶路線",
+          category: "景點",
+          type: "自然 / 季節限定",
+          district: "茂林區",
+          area: "茂林",
+          keywords: "茂林 紫斑蝶 自然 山線 季節限定",
+          reason: "適合季節性內容，若天氣穩定，很有粉專分享價值。",
+          pair: "茂林遊客中心 → 紫斑蝶景點 → 部落美食 → 山景收尾"
+        },
+        {
+          name: "統一夢時代購物中心",
+          category: "百貨商場",
+          type: "百貨 / 室內 / 親子 / 摩天輪",
+          district: "前鎮區",
+          area: "前鎮、亞洲新灣區",
+          keywords: "夢時代 百貨 商場 室內 親子 摩天輪 前鎮 雨天",
+          reason: "雨天、親子、逛街、美食都能安排，頂樓摩天輪也有視覺記憶點。",
+          pair: "夢時代午餐 → 室內逛街 → 高雄展覽館周邊 → 愛河灣夜景"
+        },
+        {
+          name: "漢神巨蛋購物廣場",
+          category: "百貨商場",
+          type: "百貨 / 美食 / 捷運",
+          district: "左營區",
+          area: "巨蛋、左營",
+          keywords: "漢神巨蛋 百貨 美食 捷運 巨蛋 瑞豐 雨天",
+          reason: "很適合和瑞豐夜市、凹子底、巨蛋商圈串成下午到晚上的路線。",
+          pair: "漢神巨蛋午茶 → 凹子底散步 → 瑞豐夜市 → 巨蛋夜景"
+        },
+        {
+          name: "義享天地",
+          category: "百貨商場",
+          type: "百貨 / 美食 / 親子 / 室內",
+          district: "鼓山區",
+          area: "鼓山、凹子底",
+          keywords: "義享天地 百貨 美食 親子 室內 鼓山 凹子底",
+          reason: "室內空間完整，附近可串凹子底、愛河之心和巨蛋生活圈。",
+          pair: "義享天地午餐 → 凹子底公園 → 愛河之心 → 巨蛋晚餐"
+        },
+        {
+          name: "大遠百高雄店",
+          category: "百貨商場",
+          type: "百貨 / 捷運 / 雨天",
+          district: "苓雅區",
+          area: "三多商圈",
+          keywords: "大遠百 三多商圈 百貨 美食 捷運 雨天 苓雅",
+          reason: "三多商圈交通方便，適合當雨天室內備案或市區行程中繼點。",
+          pair: "三多商圈午餐 → 大遠百 → 高雄展覽館 → 高流夜景"
+        },
+        {
+          name: "漢神百貨本館",
+          category: "百貨商場",
+          type: "百貨 / 美食 / 市中心",
+          district: "前金區",
+          area: "前金、中央公園",
+          keywords: "漢神百貨 本館 前金 百貨 美食 中央公園 雨天",
+          reason: "可接中央公園、愛河、前金美食，適合市中心輕鬆路線。",
+          pair: "中央公園 → 漢神百貨 → 前金美食 → 愛河散步"
+        },
+        {
+          name: "新光三越左營店",
+          category: "百貨商場",
+          type: "百貨 / 高鐵 / 美食",
+          district: "左營區",
+          area: "左營、高鐵",
+          keywords: "新光三越 左營 高鐵 彩虹市集 百貨 美食 室內",
+          reason: "適合外地朋友抵達高雄後的第一站，也能串蓮池潭或巨蛋。",
+          pair: "左營高鐵 → 新光三越 → 蓮池潭 → 瑞豐夜市"
+        },
+        {
+          name: "義大世界",
+          category: "百貨商場",
+          type: "購物 / 遊樂園 / 親子",
+          district: "大樹區",
+          area: "大樹",
+          keywords: "義大世界 義大 遊樂園 購物 親子 大樹 百貨",
+          reason: "本身就能做一日遊，適合親子、情侶和外地遊客主題。",
+          pair: "義大購物廣場 → 義大遊樂世界 → 義大夜景"
+        },
+        {
+          name: "高雄市立美術館",
+          category: "景點",
+          type: "美術館 / 室內 / 親子",
+          district: "鼓山區",
+          area: "美術館、內惟",
+          keywords: "高美館 美術館 展覽 室內 親子 鼓山 內惟",
+          reason: "適合雨天、親子和文青路線，附近生活圈可補咖啡與散步點。",
+          pair: "內惟午餐 → 高雄市立美術館 → 內惟藝術中心 → 咖啡甜點"
+        },
+        {
+          name: "內惟藝術中心",
+          category: "景點",
+          type: "藝術 / 室內 / 展覽",
+          district: "鼓山區",
+          area: "內惟、美術館",
+          keywords: "內惟藝術中心 展覽 室內 電影 鼓山 高美館",
+          reason: "可和高美館、美術館周邊咖啡串成室內文化路線。",
+          pair: "內惟藝術中心 → 高美館 → 美術館咖啡 → 愛河之心"
+        },
+        {
+          name: "壽山情人觀景台",
+          category: "景點",
+          type: "夜景 / 夕陽 / 拍照",
+          district: "鼓山區",
+          area: "壽山、西子灣",
+          keywords: "壽山 情人觀景台 夜景 夕陽 鼓山 情侶 拍照",
+          reason: "適合傍晚到晚上收尾，能拍高雄城市夜景。",
+          pair: "西子灣夕陽 → 壽山情人觀景台 → 鼓山晚餐"
+        },
+        {
+          name: "西子灣風景區",
+          category: "景點",
+          type: "夕陽 / 海景 / 散步",
+          district: "鼓山區",
+          area: "西子灣、哈瑪星",
+          keywords: "西子灣 夕陽 海景 鼓山 哈瑪星 中山大學",
+          reason: "高雄經典夕陽點，和哈瑪星、駁二、旗津都能順路。",
+          pair: "駁二 → 哈瑪星 → 西子灣夕陽 → 鼓山晚餐"
+        },
+        {
+          name: "棧貳庫 KW2",
+          category: "景點",
+          type: "港邊 / 市集 / 美食",
+          district: "鼓山區",
+          area: "鼓山、哈瑪星",
+          keywords: "棧貳庫 KW2 港邊 美食 市集 哈瑪星",
+          reason: "港邊畫面明確，適合串駁二、哈瑪星、西子灣。",
+          pair: "駁二 → 棧貳庫 → 哈瑪星散步 → 西子灣夕陽"
+        },
+        {
+          name: "旗津老街",
+          category: "美食",
+          type: "老街 / 海鮮 / 小吃",
+          district: "旗津區",
+          area: "旗津",
+          keywords: "旗津老街 旗津 美食 海鮮 小吃 渡輪",
+          reason: "可以當旗津路線的美食主軸，搭海岸夕陽很完整。",
+          pair: "渡輪 → 旗津老街小吃 → 旗津海岸 → 晚餐"
+        },
+        {
+          name: "哈瑪星鐵道文化園區",
+          category: "景點",
+          type: "鐵道 / 親子 / 拍照",
+          district: "鼓山區",
+          area: "哈瑪星",
+          keywords: "哈瑪星 鐵道 文化園區 親子 拍照 輕軌",
+          reason: "親子和拍照都適合，能自然接駁二、棧貳庫、西子灣。",
+          pair: "駁二 → 哈瑪星鐵道文化園區 → 棧貳庫 → 西子灣"
+        },
+        {
+          name: "科工館",
+          category: "景點",
+          type: "親子 / 室內 / 雨天",
+          district: "三民區",
+          area: "三民",
+          keywords: "科工館 科學工藝博物館 親子 室內 雨天 三民",
+          reason: "雨天與親子行程很實用，附近可接三民美食或澄清湖。",
+          pair: "科工館 → 三民午餐 → 澄清湖 → 晚餐"
+        },
+        {
+          name: "金獅湖風景區",
+          category: "景點",
+          type: "湖景 / 親子 / 散步",
+          district: "三民區",
+          area: "三民",
+          keywords: "金獅湖 三民 湖景 親子 散步",
+          reason: "適合三民區輕鬆散步路線，也可接附近市場美食。",
+          pair: "三民早餐 → 金獅湖 → 科工館 → 三民晚餐"
+        },
+        {
+          name: "左營舊城",
+          category: "景點",
+          type: "古蹟 / 散步 / 拍照",
+          district: "左營區",
+          area: "左營",
+          keywords: "左營舊城 古蹟 城門 蓮池潭 拍照",
+          reason: "適合和蓮池潭排在同一條，文化感比單純拍照更完整。",
+          pair: "左營舊城 → 蓮池潭 → 左營小吃 → 巨蛋"
+        },
+        {
+          name: "鳳儀書院",
+          category: "景點",
+          type: "古蹟 / 親子 / 拍照",
+          district: "鳳山區",
+          area: "鳳山",
+          keywords: "鳳儀書院 鳳山 古蹟 親子 拍照",
+          reason: "鳳山文化路線很好用，能串大東、衛武營與鳳山美食。",
+          pair: "鳳儀書院 → 鳳山午餐 → 大東文化藝術中心 → 衛武營"
+        },
+        {
+          name: "曹公圳水岸",
+          category: "景點",
+          type: "散步 / 水岸 / 市區",
+          district: "鳳山區",
+          area: "鳳山",
+          keywords: "曹公圳 鳳山 水岸 散步 咖啡",
+          reason: "適合排鳳山半日走走，搭附近美食和文化點很順。",
+          pair: "鳳山小吃 → 曹公圳水岸 → 鳳儀書院 → 大東"
+        },
+        {
+          name: "佛光山佛陀紀念館",
+          category: "景點",
+          type: "文化 / 地標 / 親子",
+          district: "大樹區",
+          area: "大樹",
+          keywords: "佛光山 佛陀紀念館 大樹 文化 親子 地標",
+          reason: "大型地標很適合做完整一日遊，和義大世界或大樹美食可搭配。",
+          pair: "佛陀紀念館 → 大樹午餐 → 義大世界 → 回程晚餐"
+        },
+        {
+          name: "舊鐵橋濕地",
+          category: "景點",
+          type: "濕地 / 鐵橋 / 戶外",
+          district: "大樹區",
+          area: "大樹",
+          keywords: "舊鐵橋 濕地 大樹 戶外 鐵道 拍照",
+          reason: "適合戶外散步與自然風景，能和佛光山、大樹美食串聯。",
+          pair: "舊鐵橋濕地 → 大樹午餐 → 佛陀紀念館"
+        },
+        {
+          name: "蚵仔寮漁港",
+          category: "美食",
+          type: "漁港 / 海鮮 / 夕陽",
+          district: "梓官區",
+          area: "梓官、彌陀",
+          keywords: "蚵仔寮 漁港 海鮮 梓官 夕陽 美食",
+          reason: "適合海線美食路線，夕陽和海鮮都有明確主題。",
+          pair: "蚵仔寮海鮮 → 彌陀海岸 → 永安濕地 → 回程"
+        },
+        {
+          name: "永安濕地",
+          category: "景點",
+          type: "濕地 / 夕陽 / 自然",
+          district: "永安區",
+          area: "永安",
+          keywords: "永安濕地 永安 夕陽 自然 海線 拍照",
+          reason: "適合海線傍晚拍攝，搭蚵仔寮或茄萣會順。",
+          pair: "蚵仔寮午餐 → 永安濕地 → 茄萣海岸 → 晚餐"
+        },
+        {
+          name: "茄萣情人碼頭",
+          category: "景點",
+          type: "海線 / 夕陽 / 散步",
+          district: "茄萣區",
+          area: "茄萣",
+          keywords: "茄萣 情人碼頭 海線 夕陽 散步",
+          reason: "可作為北高雄海線路線收尾，適合夕陽與港邊氛圍。",
+          pair: "永安濕地 → 茄萣情人碼頭 → 海線晚餐"
+        },
+        {
+          name: "田寮月世界",
+          category: "景點",
+          type: "地景 / 戶外 / 拍照",
+          district: "田寮區",
+          area: "田寮",
+          keywords: "田寮 月世界 地景 戶外 拍照 山線",
+          reason: "地景辨識度很高，適合做高雄特殊景觀一日遊。",
+          pair: "田寮月世界 → 阿蓮午餐 → 岡山羊肉 → 回程"
+        },
+        {
+          name: "阿公店水庫",
+          category: "景點",
+          type: "水庫 / 戶外 / 單車",
+          district: "燕巢區",
+          area: "燕巢、岡山",
+          keywords: "阿公店水庫 燕巢 岡山 戶外 散步 單車",
+          reason: "適合搭岡山美食和橋頭糖廠，北高雄行程很好排。",
+          pair: "橋頭糖廠 → 岡山羊肉 → 阿公店水庫"
+        },
+        {
+          name: "甲仙老街",
+          category: "美食",
+          type: "老街 / 芋頭 / 山線",
+          district: "甲仙區",
+          area: "甲仙",
+          keywords: "甲仙 老街 芋頭 美食 山線",
+          reason: "適合山線美食主題，和六龜、寶來可以串成遠程一日遊。",
+          pair: "旗山老街 → 甲仙芋頭 → 六龜寶來 → 回程"
+        },
+        {
+          name: "內門總舖師美食",
+          category: "美食",
+          type: "地方美食 / 文化",
+          district: "內門區",
+          area: "內門",
+          keywords: "內門 總舖師 美食 地方文化 山線",
+          reason: "適合做地方特色美食內容，搭旗山或田寮較順。",
+          pair: "旗山老街 → 內門總舖師美食 → 田寮月世界"
+        },
+        {
+          name: "茂林國家風景區",
+          category: "景點",
+          type: "山景 / 部落 / 自然",
+          district: "茂林區",
+          area: "茂林",
+          keywords: "茂林 國家風景區 山景 部落 自然",
+          reason: "適合山線深度路線，要搭配天氣判斷與交通時間。",
+          pair: "茂林遊客中心 → 山景步道 → 部落美食 → 回程"
+        },
+        {
+          name: "鹽埕埔小吃散步圈",
+          category: "美食",
+          type: "小吃 / 老店 / 下午茶",
+          district: "鹽埕區",
+          area: "鹽埕、駁二",
+          keywords: "鹽埕 美食 小吃 老店 米糕 冰品 鴨肉 意麵 下午茶",
+          reason: "鹽埕美食密度高，很適合當港邊路線的開場或下午茶補給。",
+          pair: "鹽埕小吃 → 駁二 → 棧貳庫 → 西子灣夕陽"
+        },
+        {
+          name: "堀江商圈美食",
+          category: "美食",
+          type: "商圈 / 小吃 / 甜點",
+          district: "新興區",
+          area: "新崛江、中央公園",
+          keywords: "新崛江 堀江 商圈 美食 甜點 飲料 小吃 年輕人",
+          reason: "適合年輕感的市區行程，下午到晚上都能拍逛街與小吃。",
+          pair: "中央公園 → 新崛江小吃 → 美麗島站 → 六合夜市"
+        },
+        {
+          name: "美麗島站周邊美食",
+          category: "美食",
+          type: "捷運 / 小吃 / 市中心",
+          district: "新興區",
+          area: "美麗島、六合",
+          keywords: "美麗島 捷運 美食 小吃 六合 市中心 雨天",
+          reason: "捷運轉乘方便，適合做不用騎太遠的市中心美食路線。",
+          pair: "美麗島站 → 周邊小吃 → 六合夜市 → 中央公園夜景"
+        },
+        {
+          name: "三鳳中街乾貨美食圈",
+          category: "美食",
+          type: "市場 / 伴手禮 / 老街",
+          district: "三民區",
+          area: "三民、建國路",
+          keywords: "三鳳中街 乾貨 伴手禮 市場 老街 三民 美食",
+          reason: "很適合拍市場感和伴手禮內容，可做節慶採買主題。",
+          pair: "三鳳中街 → 三民午餐 → 科工館 → 愛河散步"
+        },
+        {
+          name: "吉林夜市美食",
+          category: "美食",
+          type: "夜市 / 小吃 / 在地",
+          district: "三民區",
+          area: "三民、高醫",
+          keywords: "吉林夜市 三民 高醫 夜市 小吃 晚餐 宵夜",
+          reason: "在地生活感強，適合做晚上美食短影音或宵夜路線。",
+          pair: "科工館 → 三民晚餐 → 吉林夜市 → 愛河夜景"
+        },
+        {
+          name: "自由黃昏市場美食",
+          category: "美食",
+          type: "市場 / 熟食 / 晚餐",
+          district: "左營區",
+          area: "自由路、巨蛋",
+          keywords: "自由黃昏市場 左營 美食 市場 熟食 晚餐 小吃",
+          reason: "很適合傍晚覓食，能搭巨蛋、凹子底和瑞豐夜市。",
+          pair: "凹子底散步 → 自由黃昏市場 → 巨蛋商圈"
+        },
+        {
+          name: "左營眷村美食",
+          category: "美食",
+          type: "眷村 / 老店 / 麵食",
+          district: "左營區",
+          area: "左營、蓮池潭",
+          keywords: "左營 眷村 美食 老店 麵食 早餐 蓮池潭",
+          reason: "適合搭蓮池潭與左營舊城，能做有故事感的在地路線。",
+          pair: "左營眷村早餐 → 蓮池潭 → 左營舊城 → 巨蛋晚餐"
+        },
+        {
+          name: "楠梓右昌美食圈",
+          category: "美食",
+          type: "在地小吃 / 晚餐",
+          district: "楠梓區",
+          area: "楠梓、右昌",
+          keywords: "楠梓 右昌 美食 小吃 晚餐 在地",
+          reason: "適合補北高雄生活圈內容，和都會公園、橋頭糖廠可串聯。",
+          pair: "都會公園 → 楠梓右昌美食 → 橋頭糖廠"
+        },
+        {
+          name: "後勁夜市",
+          category: "美食",
+          type: "夜市 / 小吃 / 在地",
+          district: "楠梓區",
+          area: "後勁、楠梓",
+          keywords: "後勁夜市 楠梓 夜市 小吃 宵夜 在地",
+          reason: "適合做北高雄夜間美食備案，生活感比觀光夜市更強。",
+          pair: "楠梓午後散步 → 後勁夜市 → 北高雄宵夜"
+        },
+        {
+          name: "鳳山中華街夜市",
+          category: "美食",
+          type: "夜市 / 小吃 / 捷運",
+          district: "鳳山區",
+          area: "鳳山",
+          keywords: "鳳山 中華街夜市 夜市 小吃 捷運 晚餐",
+          reason: "很適合收尾鳳山文化路線，交通方便且晚餐選擇多。",
+          pair: "鳳儀書院 → 大東 → 鳳山中華街夜市"
+        },
+        {
+          name: "鳳山青年夜市",
+          category: "美食",
+          type: "夜市 / 親子 / 晚餐",
+          district: "鳳山區",
+          area: "鳳山",
+          keywords: "鳳山青年夜市 鳳山 夜市 親子 晚餐 小吃",
+          reason: "適合鳳山晚間路線，也能搭衛武營或大東做一日遊收尾。",
+          pair: "衛武營 → 大東文化藝術中心 → 鳳山青年夜市"
+        },
+        {
+          name: "前鎮草衙美食圈",
+          category: "美食",
+          type: "商圈 / 親子 / 室內",
+          district: "前鎮區",
+          area: "草衙、前鎮",
+          keywords: "草衙 前鎮 美食 SKM Park 親子 室內 百貨",
+          reason: "適合雨天親子行程，美食與室內活動能一起安排。",
+          pair: "草衙美食 → SKM Park → 前鎮河畔 → 夢時代"
+        },
+        {
+          name: "三多商圈美食",
+          category: "美食",
+          type: "商圈 / 百貨 / 咖啡",
+          district: "苓雅區",
+          area: "三多商圈",
+          keywords: "三多商圈 苓雅 美食 百貨 咖啡 大遠百 SOGO",
+          reason: "百貨與餐廳選擇多，是雨天和市區行程很好用的中繼點。",
+          pair: "三多商圈午餐 → 大遠百 → 高雄展覽館 → 愛河灣"
+        },
+        {
+          name: "苓雅自強夜市美食",
+          category: "美食",
+          type: "夜市 / 小吃 / 宵夜",
+          district: "苓雅區",
+          area: "苓雅、自強路",
+          keywords: "自強夜市 苓雅 夜市 小吃 宵夜 晚餐",
+          reason: "市區晚餐和宵夜都方便，能接愛河或高流夜景。",
+          pair: "三多商圈 → 自強夜市 → 愛河灣夜景"
+        },
+        {
+          name: "前金市場美食",
+          category: "美食",
+          type: "市場 / 早餐 / 老店",
+          district: "前金區",
+          area: "前金、市中心",
+          keywords: "前金市場 前金 早餐 美食 老店 市場 小吃",
+          reason: "適合早上開場，之後能接中央公園、漢神本館和愛河。",
+          pair: "前金市場早餐 → 中央公園 → 漢神本館 → 愛河散步"
+        },
+        {
+          name: "鼓山渡輪站周邊美食",
+          category: "美食",
+          type: "港邊 / 小吃 / 渡輪",
+          district: "鼓山區",
+          area: "鼓山、哈瑪星",
+          keywords: "鼓山 渡輪站 美食 小吃 港邊 哈瑪星",
+          reason: "可以在搭船去旗津前後安排，讓港邊路線更完整。",
+          pair: "哈瑪星 → 鼓山渡輪站美食 → 旗津 → 西子灣"
+        },
+        {
+          name: "美術館咖啡甜點圈",
+          category: "美食",
+          type: "咖啡 / 甜點 / 文青",
+          district: "鼓山區",
+          area: "美術館、內惟",
+          keywords: "美術館 咖啡 甜點 鼓山 內惟 文青 下午茶",
+          reason: "適合搭高美館和內惟藝術中心，雨天也能當備案。",
+          pair: "內惟藝術中心 → 高美館 → 咖啡甜點 → 愛河之心"
+        },
+        {
+          name: "小港桂陽美食圈",
+          category: "美食",
+          type: "在地小吃 / 晚餐",
+          district: "小港區",
+          area: "小港、桂陽",
+          keywords: "小港 桂陽 美食 小吃 晚餐 在地",
+          reason: "適合補小港生活圈內容，搭淨園或機場周邊行程。",
+          pair: "淨園農場 → 小港桂陽美食 → 小港咖啡"
+        },
+        {
+          name: "林園海鮮美食",
+          category: "美食",
+          type: "海鮮 / 在地 / 海線",
+          district: "林園區",
+          area: "林園",
+          keywords: "林園 海鮮 美食 海線 在地 晚餐",
+          reason: "適合南高雄海線主題，可搭林園海邊或小港行程。",
+          pair: "小港午後 → 林園海線散步 → 林園海鮮晚餐"
+        },
+        {
+          name: "鳥松本館路美食",
+          category: "美食",
+          type: "在地小吃 / 午餐",
+          district: "鳥松區",
+          area: "鳥松、澄清湖",
+          keywords: "鳥松 本館路 美食 小吃 午餐 澄清湖",
+          reason: "很適合搭澄清湖和科工館，中午補給方便。",
+          pair: "澄清湖 → 鳥松午餐 → 科工館 → 三民晚餐"
+        },
+        {
+          name: "大社觀音山周邊美食",
+          category: "美食",
+          type: "土雞 / 山邊 / 家庭聚餐",
+          district: "大社區",
+          area: "大社、觀音山",
+          keywords: "大社 觀音山 土雞 美食 家庭聚餐 山邊",
+          reason: "適合家庭或多人行程，能搭觀音山、義大世界或大樹景點。",
+          pair: "觀音山散步 → 大社土雞美食 → 義大世界"
+        },
+        {
+          name: "仁武八卦寮美食圈",
+          category: "美食",
+          type: "在地小吃 / 晚餐",
+          district: "仁武區",
+          area: "仁武、八卦寮",
+          keywords: "仁武 八卦寮 美食 小吃 晚餐 在地",
+          reason: "可補仁武生活圈內容，搭澄清湖或大社行程較順。",
+          pair: "澄清湖 → 仁武八卦寮美食 → 大社"
+        },
+        {
+          name: "大寮捷運站周邊美食",
+          category: "美食",
+          type: "捷運 / 在地小吃",
+          district: "大寮區",
+          area: "大寮",
+          keywords: "大寮 捷運站 美食 小吃 晚餐",
+          reason: "適合捷運橘線延伸路線，能和鳳山、大東串接。",
+          pair: "大東 → 鳳山散步 → 大寮美食"
+        },
+        {
+          name: "大樹鳳梨特色美食",
+          category: "美食",
+          type: "地方特色 / 伴手禮",
+          district: "大樹區",
+          area: "大樹",
+          keywords: "大樹 鳳梨 美食 伴手禮 地方特色 佛光山",
+          reason: "適合搭佛陀紀念館和義大世界，能做地方特色主題。",
+          pair: "佛陀紀念館 → 大樹鳳梨美食 → 義大世界"
+        },
+        {
+          name: "橋頭老街美食",
+          category: "美食",
+          type: "老街 / 冰品 / 小吃",
+          district: "橋頭區",
+          area: "橋頭",
+          keywords: "橋頭 老街 美食 冰品 小吃 糖廠 捷運",
+          reason: "適合和橋頭糖廠搭配，捷運可到，路線輕鬆。",
+          pair: "橋頭糖廠 → 橋頭老街美食 → 岡山"
+        },
+        {
+          name: "路竹在地小吃",
+          category: "美食",
+          type: "在地小吃 / 北高雄",
+          district: "路竹區",
+          area: "路竹",
+          keywords: "路竹 美食 小吃 北高雄 晚餐",
+          reason: "適合北高雄順遊補給，可接岡山、湖內、茄萣方向。",
+          pair: "岡山 → 路竹小吃 → 湖內或茄萣海線"
+        },
+        {
+          name: "湖內美食小吃",
+          category: "美食",
+          type: "在地小吃 / 海線",
+          district: "湖內區",
+          area: "湖內",
+          keywords: "湖內 美食 小吃 海線 北高雄",
+          reason: "適合北高雄海線行程中補餐，和路竹、茄萣較順。",
+          pair: "路竹 → 湖內美食 → 茄萣情人碼頭"
+        },
+        {
+          name: "彌陀海線小吃",
+          category: "美食",
+          type: "海線 / 小吃 / 海鮮",
+          district: "彌陀區",
+          area: "彌陀",
+          keywords: "彌陀 美食 海線 海鮮 小吃 梓官",
+          reason: "適合和蚵仔寮、永安濕地組成海線路線。",
+          pair: "蚵仔寮 → 彌陀小吃 → 永安濕地"
+        },
+        {
+          name: "美濃粄條老店",
+          category: "美食",
+          type: "客家 / 粄條 / 老店",
+          district: "美濃區",
+          area: "美濃",
+          keywords: "美濃 粄條 客家 美食 老店 山線",
+          reason: "是美濃路線的美食主角，搭老街、紙傘文化很完整。",
+          pair: "美濃粄條 → 美濃老街 → 紙傘文化 → 旗山"
+        },
+        {
+          name: "旗山香蕉甜點",
+          category: "美食",
+          type: "甜點 / 老街 / 伴手禮",
+          district: "旗山區",
+          area: "旗山",
+          keywords: "旗山 香蕉 甜點 老街 美食 伴手禮",
+          reason: "很適合做封面或短影音亮點，和旗山老街自然搭配。",
+          pair: "旗山老街 → 香蕉甜點 → 美濃老街"
+        },
+        {
+          name: "六龜山城餐廳",
+          category: "美食",
+          type: "山城 / 合菜 / 放鬆",
+          district: "六龜區",
+          area: "六龜、寶來",
+          keywords: "六龜 美食 山城 餐廳 合菜 寶來 溫泉",
+          reason: "適合寶來溫泉和山線放鬆路線，中途補餐很重要。",
+          pair: "六龜午餐 → 寶來溫泉 → 山城咖啡"
+        },
+        {
+          name: "桃源部落風味餐",
+          category: "美食",
+          type: "部落 / 山線 / 風味餐",
+          district: "桃源區",
+          area: "桃源",
+          keywords: "桃源 部落 風味餐 山線 美食 原民",
+          reason: "適合深度山線內容，但要搭配天氣、路況和營業確認。",
+          pair: "桃源山線景點 → 部落風味餐 → 回程休息"
+        },
+        {
+          name: "那瑪夏部落風味餐",
+          category: "美食",
+          type: "部落 / 深度旅遊 / 山線",
+          district: "那瑪夏區",
+          area: "那瑪夏",
+          keywords: "那瑪夏 部落 風味餐 山線 深度旅遊 美食",
+          reason: "適合做深度旅遊題材，正式行程要優先查路況與營業。",
+          pair: "那瑪夏景點 → 部落風味餐 → 山線回程"
+        }
+      ];
+
+      let activeIndex = 0;
+      let activePlace = "";
+
+      const routeList = document.getElementById("routeList");
+      const detailTitle = document.getElementById("detailTitle");
+      const detailReason = document.getElementById("detailReason");
+      const timeline = document.getElementById("timeline");
+      const outputBox = document.getElementById("outputBox");
+      const placeSearch = document.getElementById("placeSearch");
+      const searchResults = document.getElementById("searchResults");
+      const districtFilter = document.getElementById("districtFilter");
+      const categoryFilter = document.getElementById("categoryFilter");
+      const weatherAddress = document.getElementById("weatherAddress");
+      const weatherResult = document.getElementById("weatherResult");
+
+      function renderRoutes() {
+        routeList.innerHTML = routes
+          .map(
+            (route, index) => `
+              <button class="route-card ${index === activeIndex ? "active" : ""}" type="button" data-index="${index}">
+                <div class="route-head">
+                  <div class="route-icon">${route.icon}</div>
+                  <div>
+                    <h3>${route.title}</h3>
+                    <p>${route.tag}</p>
+                  </div>
+                </div>
+                <div class="scores">
+                  ${route.scores
+                    .map((score) => {
+                      const [label, value] = score.split(" ");
+                      return `<div class="score"><span>${label}</span><strong>${value}</strong></div>`;
+                    })
+                    .join("")}
+                </div>
+                <div class="route-advice">${route.adjustment}</div>
+              </button>
+            `
+          )
+          .join("");
+      }
+
+      function renderDetail() {
+        const route = routes[activeIndex];
+        detailTitle.textContent = route.title;
+        detailReason.innerHTML = `
+          ${route.reason}
+          <div class="today-check">
+            <div>天氣判斷：${route.weatherFit}</div>
+            <div>營業時間：${route.hoursFit}</div>
+          </div>
+        `;
+        timeline.innerHTML = route.stops
+          .map(
+            ([time, name, note]) => `
+              <div class="stop">
+                <div class="time">${time}</div>
+                <div>
+                  <strong>${name}</strong>
+                  <span>${note}</span>
+                </div>
+              </div>
+            `
+          )
+          .join("");
+      }
+
+      function renderSearchResults(query = "") {
+        const term = query.trim().toLowerCase();
+        const district = districtFilter.value;
+        const category = categoryFilter.value;
+        const genericFoodPattern = /美食圈|周邊美食|小吃散步圈|在地小吃|市場美食|海線小吃|商圈美食|老街美食/;
+        let matched = places
+          .filter((place) => !(place.category === "美食" && genericFoodPattern.test(place.name)))
+          .filter((place) => !district || place.district === district)
+          .filter((place) => !category || `${place.category} ${place.type} ${place.keywords}`.includes(category))
+          .filter((place) => {
+            if (!term) return true;
+            return `${place.name} ${place.category} ${place.type} ${place.district} ${place.area} ${place.keywords}`
+              .toLowerCase()
+              .includes(term);
+          })
+          .sort((a, b) => Number(Boolean(b.mapQuery)) - Number(Boolean(a.mapQuery)));
+
+        if (category === "美食") {
+          const exactStores = matched.filter((place) => !genericFoodPattern.test(place.name));
+          if (exactStores.length) matched = exactStores;
+        }
+
+        matched = matched
+          .slice(0, 12);
+
+        if (!matched.length) {
+          searchResults.innerHTML = `
+            <div class="place-card">
+              <button type="button">
+                <strong>目前沒有找到完全符合的地點</strong>
+                <span>可以改搜區域、類型或活動關鍵字，例如「鹽埕」、「夜市」、「咖啡」、「親子」。正式版會接更多高雄即時資料。</span>
+              </button>
+            </div>
+          `;
+          return;
+        }
+
+        searchResults.innerHTML = matched
+          .map(
+            (place) => {
+              const mapHref = place.mapQuery
+                ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(place.mapQuery)}`
+                : "";
+              return `
+              <div class="place-card ${activePlace === place.name ? "active" : ""}">
+                <button type="button" data-place="${place.name}">
+                  <strong>${place.name}</strong>
+                  <div class="place-meta">
+                    <em>${place.district}</em>
+                    <em>${place.category}</em>
+                  </div>
+                  <div class="place-signal">
+                    <b>正式版同步 Google 地圖</b>
+                    <b>店名/營業時間/評分/評論數</b>
+                  </div>
+                  <span>${place.type}｜${place.area}</span>
+                </button>
+                <div class="place-detail">
+                  ${place.reason}
+                  <div class="route-suggestion">
+                    建議航線：${place.pair}
+                  </div>
+                  <div class="route-suggestion">
+                    營業時間：${place.hours || "正式版由 Google 地圖同步"}
+                  </div>
+                  <div class="route-suggestion">
+                    地址：${place.address || "正式版由 Google 地圖同步"}
+                  </div>
+                  ${
+                    mapHref
+                      ? `<a class="map-link" href="${mapHref}" target="_blank" rel="noreferrer">開啟 Google Maps 導航</a>`
+                      : `<div class="route-suggestion">正式版欄位：正確店名、營業時間、是否仍營業、是否暫停或永久停業、Google 地圖連結、最後同步時間。</div>`
+                  }
+                </div>
+              </div>
+            `;
+            }
+          )
+          .join("");
+      }
+
+      function showOutput(type) {
+        const route = routes[activeIndex];
+        const labels = {
+          post: "FB 文案草稿",
+          shot: "拍攝清單",
+          cover: "圖卡文字",
+          save: "已加入異動通知"
+        };
+        const text =
+          type === "save"
+            ? `已把「${route.title}」加入監控。正式版會在活動時間、營業時間、天氣、交通或官方公告異動時提醒你，也會建議是否改走雨天備案。`
+            : route[type];
+        outputBox.innerHTML = `<strong>${labels[type]}</strong><br />${text}`;
+        outputBox.classList.add("show");
+        outputBox.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      }
+
+      function runSearch() {
+        activePlace = "";
+        renderSearchResults(placeSearch.value);
+      }
+
+      function mapSearchUrl(query) {
+        return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
+      }
+
+      function lookupWeather() {
+        const query = weatherAddress.value.trim() || "高雄市";
+        const isCoast = /旗津|西子灣|鼓山|海|港|愛河|高流|棧貳庫/.test(query);
+        const isIndoor = /科工館|百貨|夢時代|漢神|衛武營|美術館|內惟|展覽|商場/.test(query);
+        const suggestion = isIndoor
+          ? "這個點適合排成雨天或中午高溫備案，拍攝上可優先抓室內展區、入口、餐飲和動線。"
+          : isCoast
+            ? "這個點受海風、午後雨和夕陽時間影響較大，建議傍晚前再次確認降雨與風勢。"
+            : "這個點可以依今日高雄天氣判斷戶外/室內比例，午後如果有雨，建議保留附近室內備案。";
+
+        weatherResult.innerHTML = `
+          <strong>${query}</strong><br />
+          目前雛形：顯示拍攝建議與地圖連結。<br />
+          正式版：會同步中央氣象署資料，顯示降雨機率、體感溫度、紫外線、風速、空氣品質與日落時間。<br />
+          船長建議：${suggestion}<br />
+          <a class="map-link" href="${mapSearchUrl(query)}" target="_blank" rel="noreferrer">開啟 Google Maps</a>
+        `;
+        weatherResult.classList.add("show");
+      }
+
+      async function loadLiveStatus() {
+        try {
+          const response = await fetch("./data/live/tomorrow.json", { cache: "no-store" });
+          if (!response.ok) return;
+          const data = await response.json();
+          const alertText = data.alerts?.[0]?.message || "已連接同步資料。";
+          const weatherText = data.weather?.summary || "等待天氣 API 同步。";
+          const cards = document.querySelectorAll(".mini");
+          if (cards[0]) {
+            cards[0].querySelector("strong").textContent = data.status === "missing_api_keys" ? "待接 API" : "已同步";
+            cards[0].querySelectorAll("span")[1].textContent = weatherText;
+          }
+          if (cards[1]) {
+            cards[1].querySelector("strong").textContent = data.alerts?.length ? `${data.alerts.length} 筆提醒` : "無異動";
+            cards[1].querySelectorAll("span")[1].textContent = alertText;
+          }
+        } catch (error) {
+          // Local file preview cannot fetch JSON reliably; deployed GitHub Pages will.
+        }
+      }
+
+      function showView(viewName) {
+        document.querySelectorAll("[data-view]").forEach((view) => {
+          view.classList.toggle("active", view.dataset.view === viewName);
+        });
+        document.querySelectorAll("[data-nav]").forEach((button) => {
+          button.classList.toggle("active", button.dataset.nav === viewName);
+        });
+        outputBox.classList.remove("show");
+      }
+
+      routeList.addEventListener("click", (event) => {
+        const card = event.target.closest(".route-card");
+        if (!card) return;
+        activeIndex = Number(card.dataset.index);
+        outputBox.classList.remove("show");
+        renderRoutes();
+        renderDetail();
+      });
+
+      document.querySelectorAll("[data-output]").forEach((button) => {
+        button.addEventListener("click", () => showOutput(button.dataset.output));
+      });
+
+      document.getElementById("refreshBtn").addEventListener("click", () => {
+        activeIndex = (activeIndex + 1) % routes.length;
+        outputBox.classList.remove("show");
+        renderRoutes();
+        renderDetail();
+      });
+
+      document.getElementById("searchBtn").addEventListener("click", runSearch);
+      document.getElementById("weatherLookupBtn").addEventListener("click", lookupWeather);
+
+      placeSearch.addEventListener("input", runSearch);
+      weatherAddress.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") lookupWeather();
+      });
+      districtFilter.addEventListener("change", runSearch);
+      categoryFilter.addEventListener("change", runSearch);
+
+      document.querySelectorAll("[data-query]").forEach((button) => {
+        button.addEventListener("click", () => {
+          placeSearch.value = button.dataset.query;
+          if (button.dataset.query === "全區熱門美食") {
+            districtFilter.value = "";
+            categoryFilter.value = "美食";
+          }
+          if (button.dataset.query === "全區景點美食") {
+            placeSearch.value = "";
+            districtFilter.value = "";
+            categoryFilter.value = "";
+          }
+          if (button.dataset.query === "旗津") {
+            districtFilter.value = "旗津區";
+            categoryFilter.value = "";
+          }
+          runSearch();
+        });
+      });
+
+      searchResults.addEventListener("click", (event) => {
+        const button = event.target.closest("[data-place]");
+        if (!button) return;
+        activePlace = activePlace === button.dataset.place ? "" : button.dataset.place;
+        renderSearchResults(placeSearch.value);
+      });
+
+      document.querySelectorAll("[data-nav]").forEach((button) => {
+        button.addEventListener("click", () => showView(button.dataset.nav));
+      });
+
+      document.querySelectorAll("[data-jump]").forEach((button) => {
+        button.addEventListener("click", () => showView(button.dataset.jump));
+      });
+
+      document.querySelectorAll(".tab").forEach((tab) => {
+        tab.addEventListener("click", () => {
+          document.querySelectorAll(".tab").forEach((item) => item.classList.remove("active"));
+          tab.classList.add("active");
+        });
+      });
+
+      renderRoutes();
+      renderDetail();
+      renderSearchResults();
+      loadLiveStatus();
+    </script>
+  </body>
+</html>
