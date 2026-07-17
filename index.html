@@ -183,6 +183,13 @@
         gap: 8px;
       }
 
+      .lookup-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        margin-top: 8px;
+      }
+
       .lookup-row input {
         width: 100%;
         min-height: 44px;
@@ -204,6 +211,31 @@
         font: inherit;
         font-size: 13px;
         font-weight: 900;
+      }
+
+      .lookup-actions button,
+      .lookup-actions a {
+        min-height: 40px;
+        border: 1px solid rgba(15, 122, 168, 0.22);
+        border-radius: 14px;
+        background: #f4fafc;
+        color: var(--deep);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 10px;
+        font: inherit;
+        font-size: 12px;
+        font-weight: 900;
+        text-align: center;
+        text-decoration: none;
+      }
+
+      .location-status {
+        margin-top: 8px;
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.45;
       }
 
       .weather-result {
@@ -648,6 +680,10 @@
         text-decoration: none;
       }
 
+      .map-link.alt {
+        background: var(--sea);
+      }
+
       .section-title h2 {
         margin: 0;
         color: var(--deep);
@@ -984,6 +1020,11 @@
                 <input id="weatherAddress" type="search" placeholder="例如：高雄市三民區科工館、旗津老街" />
                 <button id="weatherLookupBtn" type="button">查詢</button>
               </div>
+              <div class="lookup-actions">
+                <button id="locationLockBtn" type="button">鎖定我的位置</button>
+                <a id="liveMapLookup" href="https://www.google.com/maps/search/?api=1&query=%E9%AB%98%E9%9B%84%E6%B4%BB%E5%8B%95%20%E7%BE%8E%E9%A3%9F%20%E6%99%AF%E9%BB%9E" target="_blank" rel="noreferrer">Google 即時搜尋</a>
+              </div>
+              <div class="location-status" id="locationStatus">尚未鎖定位置。手機會跳出定位權限，允許後可從目前位置導航。</div>
               <div class="weather-result" id="weatherResult"></div>
             </section>
             <div class="home-actions">
@@ -1105,6 +1146,10 @@
             <div class="search-box">
               <input id="placeSearch" type="search" placeholder="輸入地點、區域、夜市、咖啡、親子..." />
               <button id="searchBtn" type="button">搜尋</button>
+            </div>
+            <div class="lookup-actions">
+              <button id="searchNearMeBtn" type="button">用目前位置找附近</button>
+              <a id="googleLiveSearch" href="https://www.google.com/maps/search/?api=1&query=%E9%AB%98%E9%9B%84%E6%99%AF%E9%BB%9E%20%E7%BE%8E%E9%A3%9F" target="_blank" rel="noreferrer">去 Google 查最新</a>
             </div>
             <div class="filters">
               <select id="districtFilter" aria-label="選擇高雄行政區">
@@ -2677,6 +2722,12 @@
       const categoryFilter = document.getElementById("categoryFilter");
       const weatherAddress = document.getElementById("weatherAddress");
       const weatherResult = document.getElementById("weatherResult");
+      const locationStatus = document.getElementById("locationStatus");
+      const liveMapLookup = document.getElementById("liveMapLookup");
+      const googleLiveSearch = document.getElementById("googleLiveSearch");
+      const searchNearMeBtn = document.getElementById("searchNearMeBtn");
+      let currentPosition = null;
+      let watchPositionId = null;
 
       function renderRoutes() {
         routeList.innerHTML = routes
@@ -2756,12 +2807,16 @@
           .slice(0, 12);
 
         if (!matched.length) {
+          const liveQuery = buildSearchQuery(query || district || category || "高雄景點美食");
           searchResults.innerHTML = `
             <div class="place-card">
               <button type="button">
                 <strong>目前沒有找到完全符合的地點</strong>
-                <span>可以改搜區域、類型或活動關鍵字，例如「鹽埕」、「夜市」、「咖啡」、「親子」。正式版會接更多高雄即時資料。</span>
+                <span>可以改搜區域、類型或活動關鍵字，也可以直接去 Google Maps 查最新營業資訊。</span>
               </button>
+              <div class="place-detail" style="display:block">
+                <a class="map-link" href="${mapSearchUrl(liveQuery)}" target="_blank" rel="noreferrer">去 Google Maps 查「${liveQuery}」</a>
+              </div>
             </div>
           `;
           return;
@@ -2773,6 +2828,7 @@
               const mapHref = place.mapQuery
                 ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(place.mapQuery)}`
                 : "";
+              const navHref = place.mapQuery ? mapDirectionsUrl(place.mapQuery) : "";
               return `
               <div class="place-card ${activePlace === place.name ? "active" : ""}">
                 <button type="button" data-place="${place.name}">
@@ -2800,7 +2856,8 @@
                   </div>
                   ${
                     mapHref
-                      ? `<a class="map-link" href="${mapHref}" target="_blank" rel="noreferrer">開啟 Google Maps 導航</a>`
+                      ? `<a class="map-link" href="${mapHref}" target="_blank" rel="noreferrer">Google Maps 最新資訊</a>
+                         <a class="map-link alt" href="${navHref}" target="_blank" rel="noreferrer">從目前位置導航</a>`
                       : `<div class="route-suggestion">正式版欄位：正確店名、營業時間、是否仍營業、是否暫停或永久停業、Google 地圖連結、最後同步時間。</div>`
                   }
                 </div>
@@ -2830,11 +2887,81 @@
 
       function runSearch() {
         activePlace = "";
+        updateGoogleLiveLinks();
         renderSearchResults(placeSearch.value);
+      }
+
+      function buildSearchQuery(query) {
+        const term = String(query || "").trim();
+        if (!term) return "高雄景點 美食 活動";
+        if (/高雄/.test(term)) return term;
+        return `高雄 ${term}`;
       }
 
       function mapSearchUrl(query) {
         return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
+      }
+
+      function mapDirectionsUrl(destination) {
+        const base = "https://www.google.com/maps/dir/?api=1";
+        const dest = `destination=${encodeURIComponent(destination)}`;
+        const travel = "travelmode=driving";
+        if (!currentPosition) return `${base}&${dest}&${travel}`;
+        const origin = `origin=${currentPosition.latitude},${currentPosition.longitude}`;
+        return `${base}&${origin}&${dest}&${travel}`;
+      }
+
+      function updateGoogleLiveLinks() {
+        const query = buildSearchQuery(placeSearch.value || weatherAddress.value || categoryFilter.value || "景點 美食 活動");
+        const searchHref = currentPosition
+          ? `https://www.google.com/maps/search/${encodeURIComponent(query)}/@${currentPosition.latitude},${currentPosition.longitude},15z`
+          : mapSearchUrl(query);
+        if (googleLiveSearch) {
+          googleLiveSearch.href = searchHref;
+          googleLiveSearch.textContent = `去 Google 查「${query}」`;
+        }
+        if (liveMapLookup) {
+          liveMapLookup.href = searchHref;
+        }
+      }
+
+      function setLocationStatus(message) {
+        if (locationStatus) locationStatus.textContent = message;
+      }
+
+      function lockCurrentLocation() {
+        if (!navigator.geolocation) {
+          setLocationStatus("這台裝置或瀏覽器不支援定位，請改用 Google Maps 手動定位。");
+          return;
+        }
+        setLocationStatus("正在鎖定你的即時位置，請在手機定位權限跳窗按允許。");
+        const success = (position) => {
+          currentPosition = {
+            latitude: Number(position.coords.latitude.toFixed(6)),
+            longitude: Number(position.coords.longitude.toFixed(6)),
+            accuracy: Math.round(position.coords.accuracy || 0)
+          };
+          localStorage.setItem("hookCaptainLocation", JSON.stringify(currentPosition));
+          setLocationStatus(`已鎖定目前位置：${currentPosition.latitude}, ${currentPosition.longitude}，誤差約 ${currentPosition.accuracy} 公尺。搜尋結果會優先提供從目前位置導航。`);
+          updateGoogleLiveLinks();
+          renderSearchResults(placeSearch.value);
+        };
+        const error = (err) => {
+          const reason = err.code === 1 ? "你拒絕了定位權限" : err.code === 2 ? "目前抓不到位置" : "定位逾時";
+          setLocationStatus(`${reason}。你仍可使用 Google Maps 即時搜尋與手動導航。`);
+        };
+        navigator.geolocation.getCurrentPosition(success, error, {
+          enableHighAccuracy: true,
+          timeout: 12000,
+          maximumAge: 30000
+        });
+        if (watchPositionId == null) {
+          watchPositionId = navigator.geolocation.watchPosition(success, error, {
+            enableHighAccuracy: true,
+            timeout: 15000,
+            maximumAge: 30000
+          });
+        }
       }
 
       function lookupWeather() {
@@ -2852,9 +2979,11 @@
           目前版本：顯示拍攝建議與地圖連結。<br />
           正式版：會同步中央氣象署資料，顯示降雨機率、體感溫度、紫外線、風速、空氣品質與日落時間。<br />
           船長建議：${suggestion}<br />
-          <a class="map-link" href="${mapSearchUrl(query)}" target="_blank" rel="noreferrer">開啟 Google Maps</a>
+          <a class="map-link" href="${mapSearchUrl(query)}" target="_blank" rel="noreferrer">Google Maps 最新資訊</a>
+          <a class="map-link alt" href="${mapDirectionsUrl(query)}" target="_blank" rel="noreferrer">從目前位置導航</a>
         `;
         weatherResult.classList.add("show");
+        updateGoogleLiveLinks();
       }
 
       async function loadLiveStatus() {
@@ -2910,8 +3039,21 @@
 
       document.getElementById("searchBtn").addEventListener("click", runSearch);
       document.getElementById("weatherLookupBtn").addEventListener("click", lookupWeather);
+      document.getElementById("locationLockBtn").addEventListener("click", lockCurrentLocation);
+      searchNearMeBtn.addEventListener("click", () => {
+        if (!currentPosition) lockCurrentLocation();
+        const query = buildSearchQuery(placeSearch.value || categoryFilter.value || "附近美食 景點");
+        window.open(
+          currentPosition
+            ? `https://www.google.com/maps/search/${encodeURIComponent(query)}/@${currentPosition.latitude},${currentPosition.longitude},15z`
+            : mapSearchUrl(query),
+          "_blank",
+          "noreferrer"
+        );
+      });
 
       placeSearch.addEventListener("input", runSearch);
+      weatherAddress.addEventListener("input", updateGoogleLiveLinks);
       weatherAddress.addEventListener("keydown", (event) => {
         if (event.key === "Enter") lookupWeather();
       });
@@ -2964,6 +3106,16 @@
       renderDetail();
       renderSearchResults();
       loadLiveStatus();
+      try {
+        const storedLocation = JSON.parse(localStorage.getItem("hookCaptainLocation") || "null");
+        if (storedLocation?.latitude && storedLocation?.longitude) {
+          currentPosition = storedLocation;
+          setLocationStatus(`已載入上次位置：${currentPosition.latitude}, ${currentPosition.longitude}。若要更新即時位置，請重新按「鎖定我的位置」。`);
+          updateGoogleLiveLinks();
+        }
+      } catch (error) {
+        localStorage.removeItem("hookCaptainLocation");
+      }
     </script>
   </body>
 </html>
